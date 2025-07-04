@@ -1,0 +1,11 @@
+# PHP
+vendor/
+storage/
+.env            # 認証情報は絶対にコミットしない
+
+# Node（将来 Next.js を追加するとき）
+node_modules/
+
+# Docker
+mysql_data/
+redis_data/

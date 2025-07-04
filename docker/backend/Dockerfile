@@ -19,10 +19,4 @@ RUN addgroup --system app && adduser --system --group app \
 USER app
 
 # 本番環境向け最終 CMD（開発中は artisan serve で十分）
-CMD ["sh", "-c", "\
-    composer install --no-dev --optimize-autoloader && \
-    php artisan key:generate --ansi && \
-    php artisan migrate --force && \
-    php artisan serve --host=0.0.0.0 --port=8000 && \
-    php-fpm \
-"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
