@@ -4,25 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class AuthController extends Controller
 {
-    public function register()
+    public function register(Request $request)
     {
         // Logic for user registration
     }
 
-    public function login()
+    public function login(Request $request)
     {
         // Logic for user login
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
         // Logic for user logout
-    }
-
-    public function destroy()
-    {
-        // Logic for deleting a user account
     }
 }

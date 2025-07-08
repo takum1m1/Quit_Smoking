@@ -1,27 +1,32 @@
 <?php
 
-use App\Models\User;
-use Illuminate\Http\Request;
+use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminPostController;
+use App\Http\Controllers\AdminCommentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\UserProfileController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
 
 // ユーザー登録
-Route::post('/register', [UserController::class, 'register']);
+Route::post('/register', [AuthController::class, 'register']);
 // ログイン
-Route::post('/login', [UserController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login']);
 
 /**********************************************
  * ログインユーザー用エンドポイント
  **********************************************/
 Route::middleware('auth:sanctum')->group(function () {
     // ログアウト
-    Route::post('/logout', [UserController::class, 'logout']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    // パスワードリセットメール送信
+    Route::post('/password/email', [AuthController::class, 'sendResetLinkEmail']);
+    // パスワードリセット
+    Route::post('/password/reset', [AuthController::class, 'resetPassword']);
     // アカウント削除
-    Route::delete('/user', [UserController::class, 'destroy']);
+    Route::delete('/user', [AuthController::class, 'destroy']);
     // ユーザープロフィール(自分の情報)
     Route::get('/profile', [UserProfileController::class, 'show']);
     // バッジ一覧
@@ -42,12 +47,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/posts/{id}', [PostController::class, 'update']);
     // 投稿削除
     Route::delete('/posts/{id}', [PostController::class, 'destroy']);
-    // コメント一覧
-    Route::get('/posts/{postId}/comments', [CommentController::class, 'index']);
     // コメント作成
     Route::post('/posts/{postId}/comments', [CommentController::class, 'store']);
-    // コメント更新
-    Route::put('/posts/{postId}/comments/{commentId}', [CommentController::class, 'update']);
     // コメント削除
     Route::delete('/posts/{postId}/comments/{commentId}', [CommentController::class, 'destroy']);
     // いいね機能
@@ -63,17 +64,17 @@ Route::middleware('auth:sanctum')->group(function () {
  **********************************************/
 Route::middleware('auth:sanctum', 'admin')->group(function () {
     // ユーザー一覧
-    Route::get('/admin/users', [UserController::class, 'index']);
+    Route::get('/admin/users', [AdminUserController::class, 'index']);
     // ユーザー詳細
-    Route::get('/admin/users/{id}', [UserController::class, 'show']);
+    Route::get('/admin/users/{id}', [AdminUserController::class, 'show']);
     // ユーザーBAN
-    Route::delete('/admin/users/{id}', [UserController::class, 'destroy']);
+    Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy']);
     // 投稿一覧
-    Route::get('/admin/posts', [PostController::class, 'index']);
+    Route::get('/admin/posts', [AdminPostController::class, 'index']);
     // 投稿削除
-    Route::delete('/admin/posts/{id}', [PostController::class, 'destroy']);
+    Route::delete('/admin/posts/{id}', [AdminPostController::class, 'destroy']);
     // コメント一覧
-    Route::get('/admin/comments', [CommentController::class, 'index']);
+    Route::get('/admin/comments', [AdminCommentController::class, 'index']);
     // コメント削除
-    Route::delete('/admin/comments/{id}', [CommentController::class, 'destroy']);
+    Route::delete('/admin/comments/{id}', [AdminCommentController::class, 'destroy']);
 });
