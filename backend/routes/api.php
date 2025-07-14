@@ -23,12 +23,6 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
 // パスワードリセット
 Route::post('/reset-password/{token}', [AuthController::class, 'resetPassword'])
     ->name('password.reset');
-// Route::get('/password/reset/{token}', function (Request $request, $token) {
-//     return response()->json([
-//         'token' => $token,
-//         'email' => $request->query('email'),
-//     ]);
-// })->name('password.reset');
 
 /**********************************************
  * ログインユーザー用エンドポイント
@@ -37,15 +31,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // アカウント削除
     Route::delete('/user', [AuthController::class, 'destroy']);
     // ユーザープロフィール(自分の情報)
-    Route::get('/profile', [UserProfileController::class, 'show']);
+    Route::get('/profile', [UserProfileController::class, 'myProfile']);
     // バッジ一覧
     Route::get('/profile/badges', [UserProfileController::class, 'getBadges']);
     // ユーザープロフィール更新
-    Route::put('/profile', [UserProfileController::class, 'update']);
+    Route::patch('/profile', [UserProfileController::class, 'update']);
     // 禁煙情報リセット
-    Route::post('/profile/reset', [UserProfileController::class, 'resetSmokingInfo']);
+    Route::post('/profile/reset', [UserProfileController::class, 'resetQuitInfo']);
     // ユーザープロフィール取得(他のユーザーの情報)
-    Route::get('/profile/{id}', [UserProfileController::class, 'show']);
+    Route::get('/profile/{id}', [UserProfileController::class, 'showById']);
     // 投稿一覧
     Route::get('/posts', [PostController::class, 'index']);
     // 投稿詳細
