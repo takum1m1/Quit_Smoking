@@ -11,8 +11,11 @@ use App\UseCases\Auth\LoginAction;
 use App\UseCases\Auth\LogoutAction;
 use App\UseCases\Auth\RegisterAction;
 use App\UseCases\Auth\ResetPasswordAction;
+use App\UseCases\UserAccount\DestroyAction;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
+
 {
     public function register(RegisterRequest $req, RegisterAction $action)
     {
@@ -50,5 +53,11 @@ class AuthController extends Controller
         $action($req->validated(), $token);
 
         return response()->json(['message' => 'パスワードがリセットされました。'], 200);
+    }
+
+    public function destroy(DestroyAction $action)
+    {
+        $action(Auth::user());
+        return response()->json(['message' => 'アカウントが削除されました。'], 200);
     }
 }
