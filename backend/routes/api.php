@@ -9,22 +9,31 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\AuthController;
+use Illuminate\Http\Request;
 
 // ユーザー登録
 Route::post('/register', [AuthController::class, 'register']);
 // ログイン
 Route::post('/login', [AuthController::class, 'login']);
+// ログアウト
+Route::post('/logout', [AuthController::class, 'logout']);
+// パスワード再設定リンクの送信依頼
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
+    ->name('password.request');
+// パスワードリセット
+Route::post('/reset-password/{token}', [AuthController::class, 'resetPassword'])
+    ->name('password.reset');
+// Route::get('/password/reset/{token}', function (Request $request, $token) {
+//     return response()->json([
+//         'token' => $token,
+//         'email' => $request->query('email'),
+//     ]);
+// })->name('password.reset');
 
 /**********************************************
  * ログインユーザー用エンドポイント
  **********************************************/
 Route::middleware('auth:sanctum')->group(function () {
-    // ログアウト
-    Route::post('/logout', [AuthController::class, 'logout']);
-    // パスワードリセットメール送信
-    Route::post('/password/email', [AuthController::class, 'sendResetLinkEmail']);
-    // パスワードリセット
-    Route::post('/password/reset', [AuthController::class, 'resetPassword']);
     // アカウント削除
     Route::delete('/user', [AuthController::class, 'destroy']);
     // ユーザープロフィール(自分の情報)
