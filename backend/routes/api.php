@@ -58,8 +58,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts/{postId}/like', [LikeController::class, 'likePost']);
     // いいね解除
     Route::post('/posts/{postId}/unlike', [LikeController::class, 'unlikePost']);
-    // いいね一覧取得
-    Route::get('/posts/{postId}/likes', [LikeController::class, 'getLikes']);
 });
 
 /**********************************************
