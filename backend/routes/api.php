@@ -15,8 +15,6 @@ use Illuminate\Http\Request;
 Route::post('/register', [AuthController::class, 'register']);
 // ログイン
 Route::post('/login', [AuthController::class, 'login']);
-// ログアウト
-Route::post('/logout', [AuthController::class, 'logout']);
 // パスワード再設定リンクの送信依頼
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
     ->name('password.request');
@@ -28,6 +26,8 @@ Route::post('/reset-password/{token}', [AuthController::class, 'resetPassword'])
  * ログインユーザー用エンドポイント
  **********************************************/
 Route::middleware('auth:sanctum')->group(function () {
+    // ログアウト
+    Route::post('/logout', [AuthController::class, 'logout']);
     // アカウント削除
     Route::delete('/user', [AuthController::class, 'destroy']);
     // ユーザープロフィール(自分の情報)

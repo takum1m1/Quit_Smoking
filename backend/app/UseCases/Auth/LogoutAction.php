@@ -11,12 +11,8 @@ class LogoutAction
      *
      * @return void
      */
-    public function __invoke(): void
+    public function __invoke()
     {
-        Auth::logout();
-        session()->invalidate();
-        session()->regenerateToken();
-        // セッションを無効化し、CSRFトークンを再生成します。
-        // これにより、セッションハイジャックのリスクを軽減します。
+        Auth::user()->currentAccessToken()->delete();
     }
 }

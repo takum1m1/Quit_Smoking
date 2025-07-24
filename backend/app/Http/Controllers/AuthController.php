@@ -27,9 +27,9 @@ class AuthController extends Controller
 
     public function login(LoginRequest $req, LoginAction $action)
     {
-        if ($action($req->validated())) {
+        if ($token = $action($req->validated())) {
             // ログインが成功した場合、トークンを返します。
-            return response()->json(['message' => 'ログインが成功しました。'], 200);
+            return response()->json(['message' => 'ログインが成功しました。', 'token' => $token], 200);
         }
         // ログインが失敗した場合、エラーメッセージを返します。
         return response()->json(['message' => 'ログインに失敗しました。メールアドレスまたはパスワードが正しくありません。'], 401);

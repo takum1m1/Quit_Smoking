@@ -15,12 +15,17 @@ class LoginAction
      * @return bool
      * @throws \Exception
      */
-    public function __invoke(array $data): bool
+    public function __invoke(array $data)
     {
-        if (Auth::guard('web')->attempt($data)) {
-            session()->regenerate();
-            return true;
+        $user = User::where('email', $data['email'])->first();
+
+        if (!$user || !Hash::check($data['password'], $user->password)) {
+            return false; // ログイン失敗
         }
-        return false;
+
+        //ログイン済みの場合も新しいトークンを発行
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return $token;
     }
 }
