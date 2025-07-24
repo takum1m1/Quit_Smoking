@@ -1,22 +1,22 @@
 <?php
 
-namespace App\UseCases\Profile;
+namespace App\UseCases\UserProfile;
 
-use App\Models\UserProfile;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 
-class GetMyProfileAction
+class GetByIdProfileAction
 {
     /**
-     * Execute the action to get the user's profile.
+     * Execute the action to get a user's profile by ID.
      *
+     * @param int $id
      * @return array
      */
-    public function __invoke() : array
+    public function __invoke(int $id): array
     {
-        $user = Auth::user();
-        $userProfile = UserProfile::findOrFail($user->id);
+        $userProfile = User::findOrFail($id)->profile;
 
         $quitDate = $userProfile->quit_date;
         $now = CarbonImmutable::now();
@@ -40,5 +40,6 @@ class GetMyProfileAction
             'saved_money'      => $savedMoney,
             'extended_life'    => $extendedLife,
         ];
+
     }
 }

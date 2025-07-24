@@ -1,6 +1,6 @@
 <?php
 
-namespace App\UseCases\Profile;
+namespace App\UseCases\UserProfile;
 
 use App\Models\User;
 use App\Models\UserProfile;

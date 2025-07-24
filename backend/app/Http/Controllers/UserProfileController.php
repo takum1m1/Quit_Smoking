@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Profile\UpdateProfileRequest;
-use App\UseCases\Profile\GetByIdProfileAction;
-use App\UseCases\Profile\GetMyProfileAction;
-use App\UseCases\Profile\ResetQuitInfoAction;
-use App\UseCases\Profile\UpdateProfileAction;
+use App\Http\Requests\UserProfile\UpdateRequest;
+use App\UseCases\UserProfile\GetByIdProfileAction;
+use App\UseCases\UserProfile\GetMyProfileAction;
+use App\UseCases\UserProfile\ResetQuitInfoAction;
+use App\UseCases\UserProfile\UpdateAction;
 
 class UserProfileController extends Controller
 {
@@ -19,7 +19,7 @@ class UserProfileController extends Controller
         return response()->json($profile, 200);
     }
 
-    public function update(UpdateProfileRequest $req, UpdateProfileAction $action)
+    public function update(UpdateRequest $req, UpdateAction $action)
     {
         $action($req->validated());
 

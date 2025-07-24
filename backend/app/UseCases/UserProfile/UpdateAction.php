@@ -1,11 +1,11 @@
 <?php
 
-namespace App\UseCases\Profile;
+namespace App\UseCases\UserProfile;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
-class UpdateProfileAction
+class UpdateAction
 {
     /**
      * Execute the action to update the user's profile.
