@@ -24,7 +24,7 @@ class UpdateRequest extends FormRequest
         return [
             'display_name' => 'required|string|max:20',
             'daily_cigarettes' => 'required|integer|min:1',
-            'pack_cost' => 'required|integer|min:400|max:3000',
+            'pack_cost' => 'required|integer|min:300|max:3000',
         ];
     }
 }

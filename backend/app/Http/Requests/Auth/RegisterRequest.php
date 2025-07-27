@@ -25,7 +25,7 @@ class RegisterRequest extends FormRequest
     {
         return [
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|regex:/^(?=.*[a-zA-Z])(?=.*\d).+$/', // 少なくともアルファベット1文字と数字1文字
+            'password' => 'required|string|min:8|regex:/^(?=.*[a-zA-Z])(?=.*\d).+$/|confirmed', // 少なくともアルファベット1文字と数字1文字
             'password_confirmation' => 'required_with:password|string|min:8',
             'display_name' => 'required|string|max:20',
             'daily_cigarettes' => 'required|integer|min:1',

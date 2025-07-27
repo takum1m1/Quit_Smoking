@@ -69,19 +69,19 @@ class CommentControllerTest extends TestCase
     }
 
     /**
-     * 存在しない投稿にコメント作成が失敗することをテスト
+     * 存在しない投稿にコメントを作成しようとした場合のテスト
      */
     public function test_store_fails_with_nonexistent_post(): void
     {
         Sanctum::actingAs($this->user);
 
         $commentData = [
-            'content' => 'これは新しいコメントです。',
+            'content' => 'これはテストコメントです。',
         ];
 
         $response = $this->postJson('/api/posts/999/comments', $commentData);
 
-        $response->assertStatus(500);
+        $response->assertStatus(404);
     }
 
     /**
