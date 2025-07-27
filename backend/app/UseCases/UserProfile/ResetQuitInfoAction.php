@@ -16,7 +16,7 @@ class ResetQuitInfoAction
      */
     public function __invoke(): void
     {
-        $userProfile = UserProfile::findOrFail(Auth::user()->id);
+        $userProfile = UserProfile::where('user_id', Auth::user()->id)->firstOrFail();
 
         $userProfile->quit_date = CarbonImmutable::now();
         $userProfile->save();

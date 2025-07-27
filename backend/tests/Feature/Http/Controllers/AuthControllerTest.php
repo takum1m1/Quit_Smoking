@@ -73,4 +73,31 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(401);
         $response->assertJson(['message' => 'ログインに失敗しました。メールアドレスまたはパスワードが正しくありません。']);
     }
+
+    /**
+     * ログアウト
+     */
+    public function test_logout(): void
+    {
+        $user = User::factory()->create();
+
+        // ログインしてトークンを取得
+        $loginData = [
+            'email' => $user->email,
+            'password' => 'password', // UserFactoryのデフォルトパスワード
+        ];
+
+        $loginResponse = $this->post('api/login', $loginData);
+        $loginResponse->assertStatus(200);
+
+        $token = $loginResponse->json('token');
+
+        // 取得したトークンでログアウト
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->post('api/logout');
+
+        $response->assertStatus(200);
+        $response->assertJson(['message' => 'ログアウトが成功しました']);
+    }
 }

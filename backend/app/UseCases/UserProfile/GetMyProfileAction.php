@@ -16,7 +16,7 @@ class GetMyProfileAction
     public function __invoke() : array
     {
         $user = Auth::user();
-        $userProfile = UserProfile::findOrFail($user->id);
+        $userProfile = UserProfile::where('user_id', $user->id)->firstOrFail();
 
         $quitDate = $userProfile->quit_date;
         $now = CarbonImmutable::now();

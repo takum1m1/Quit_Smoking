@@ -55,7 +55,8 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
-        ]
+        ],
+        "test:sqlite": "DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan test"
     },
     "extra": {
         "laravel": {
