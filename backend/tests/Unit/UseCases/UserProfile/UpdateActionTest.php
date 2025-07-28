@@ -4,6 +4,7 @@ namespace Tests\Unit\UseCases\UserProfile;
 
 use App\Models\User;
 use App\Models\UserProfile;
+use App\UseCases\UserProfile\CheckAndAwardBadgesAction;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\UseCases\UserProfile\UpdateAction;
@@ -11,6 +12,7 @@ use App\UseCases\UserProfile\UpdateAction;
 class UpdateActionTest extends TestCase
 {
     use RefreshDatabase;
+
     /**
      * ユーザー更新機能
      */
@@ -34,7 +36,8 @@ class UpdateActionTest extends TestCase
             'pack_cost' => 450,
         ];
 
-        $action = new UpdateAction();
+        $checkAndAwardBadgesAction = new CheckAndAwardBadgesAction();
+        $action = new UpdateAction($checkAndAwardBadgesAction);
         $actual = $action($data);
 
         $this->assertNull($actual); // 戻り値はvoidなのでnullを期待

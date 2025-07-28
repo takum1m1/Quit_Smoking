@@ -32,8 +32,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/user', [AuthController::class, 'destroy']);
     // ユーザープロフィール(自分の情報)
     Route::get('/profile', [UserProfileController::class, 'myProfile']);
-    // バッジ一覧
-    Route::get('/profile/badges', [UserProfileController::class, 'getBadges']);
+    // バッジチェック
+    Route::post('/profile/check-badges', [UserProfileController::class, 'checkBadges']);
     // ユーザープロフィール更新
     Route::patch('/profile', [UserProfileController::class, 'update']);
     // 禁煙情報リセット

@@ -30,6 +30,9 @@ class GetMyProfileAction
         $savedMoney = ($packCost * $quitCigarettes) / 20;
         $extendedLife = $quitCigarettes * 10; // 1本あたり10分
 
+        // バッジ情報を取得
+        $badges = $this->getBadgesInfo($userProfile->earned_badges ?? []);
+
         return [
             'display_name'     => $userProfile->display_name,
             'daily_cigarettes' => $dailyCigarettes,
@@ -39,6 +42,31 @@ class GetMyProfileAction
             'quit_cigarettes'  => $quitCigarettes,
             'saved_money'      => $savedMoney,
             'extended_life'    => $extendedLife,
+            'badges'           => $badges,
         ];
+    }
+
+    /**
+     * Get badges information from earned badge codes.
+     *
+     * @param array $earnedBadgeCodes
+     * @return array
+     */
+    private function getBadgesInfo(array $earnedBadgeCodes): array
+    {
+        $badgeDefinitions = config('badges.badges');
+        $badges = [];
+
+        foreach ($badgeDefinitions as $badge) {
+            if (in_array($badge['code'], $earnedBadgeCodes)) {
+                $badges[] = [
+                    'code' => $badge['code'],
+                    'name' => $badge['name'],
+                    'description' => $badge['description'],
+                ];
+            }
+        }
+
+        return $badges;
     }
 }

@@ -36,9 +36,4 @@ class UserProfile extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-    public function badges()
-    {
-        return $this->morphToMany(Badge::class, 'badgeable');
-    }
 }

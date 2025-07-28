@@ -1,3 +1,34 @@
+# 禁煙支援アプリケーション - バックエンド
+
+## バッジ機能
+
+このアプリケーションでは、ユーザーの禁煙期間に応じてバッジを授与する機能を実装しています。
+
+### 利用可能なバッジ
+
+- **1週間達成**: 禁煙を1週間続けた場合に授与
+- **1ヶ月達成**: 禁煙を1ヶ月続けた場合に授与  
+- **半年達成**: 禁煙を半年続けた場合に授与
+- **1年間達成**: 禁煙を1年間続けた場合に授与
+
+### バッジ機能の仕組み
+
+1. **自動授与**: プロフィール更新時に自動的にバッジチェックが実行されます
+2. **手動チェック**: `/api/profile/check-badges` エンドポイントで手動でバッジチェックを実行できます
+3. **プロフィール表示**: プロフィール取得時に獲得済みバッジが表示されます
+
+### API エンドポイント
+
+- `GET /api/profile` - 自分のプロフィール取得（バッジ情報含む）
+- `GET /api/profile/{id}` - 他のユーザーのプロフィール取得（バッジ情報含む）
+- `POST /api/profile/check-badges` - バッジチェック実行
+
+### データベース構造
+
+- `user_profiles.earned_badges` - JSONカラムで獲得済みバッジのコードを保存
+
+---
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserProfile\UpdateRequest;
+use App\UseCases\UserProfile\CheckAndAwardBadgesAction;
 use App\UseCases\UserProfile\GetByIdProfileAction;
 use App\UseCases\UserProfile\GetMyProfileAction;
 use App\UseCases\UserProfile\ResetQuitInfoAction;
@@ -40,5 +41,17 @@ class UserProfileController extends Controller
 
         // プロフィール情報を返す
         return response()->json($profile, 200);
+    }
+
+    public function checkBadges(CheckAndAwardBadgesAction $action)
+    {
+        // バッジチェックを実行
+        $awardedBadges = $action();
+
+        // バッジ情報を返す
+        return response()->json([
+            'message' => 'バッジチェックが完了しました。',
+            'awarded_badges' => $awardedBadges,
+        ], 200);
     }
 }

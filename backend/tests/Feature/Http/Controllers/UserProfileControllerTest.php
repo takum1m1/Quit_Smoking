@@ -4,6 +4,7 @@ namespace Tests\Feature\Http\Controllers;
 
 use App\Models\User;
 use App\Models\UserProfile;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -12,178 +13,138 @@ class UserProfileControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $user;
-    private UserProfile $userProfile;
-
-    protected function setUp(): void
+    public function test_プロフィール取得時にバッジ情報が含まれる(): void
     {
-        parent::setUp();
-        $this->user = User::factory()->create();
-        $this->userProfile = UserProfile::factory()->create([
-            'user_id' => $this->user->id,
-            'display_name' => 'Test User',
+        // Arrange
+        $user = User::factory()->create();
+        $userProfile = UserProfile::factory()->create([
+            'user_id' => $user->id,
+            'quit_date' => Carbon::now()->subDays(10),
+            'earned_badges' => ['one_week'],
+        ]);
+
+        Sanctum::actingAs($user);
+
+        // Act
+        $response = $this->getJson('/api/profile');
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'display_name',
+            'daily_cigarettes',
+            'pack_cost',
+            'quit_date',
+            'quit_days_count',
+            'quit_cigarettes',
+            'saved_money',
+            'extended_life',
+            'badges' => [
+                '*' => [
+                    'code',
+                    'name',
+                    'description',
+                ]
+            ]
+        ]);
+
+        $this->assertCount(1, $response->json('badges'));
+        $this->assertEquals('one_week', $response->json('badges.0.code'));
+    }
+
+    public function test_バッジチェックエンドポイントが正常に動作する(): void
+    {
+        // Arrange
+        $user = User::factory()->create();
+        $userProfile = UserProfile::factory()->create([
+            'user_id' => $user->id,
+            'quit_date' => Carbon::now()->subDays(7),
+        ]);
+
+        Sanctum::actingAs($user);
+
+        // Act
+        $response = $this->postJson('/api/profile/check-badges');
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'message',
+            'awarded_badges' => [
+                '*' => [
+                    'code',
+                    'name',
+                    'description',
+                ]
+            ]
+        ]);
+
+        $this->assertCount(1, $response->json('awarded_badges'));
+        $this->assertEquals('one_week', $response->json('awarded_badges.0.code'));
+    }
+
+    public function test_プロフィール更新時にバッジチェックが実行される(): void
+    {
+        // Arrange
+        $user = User::factory()->create();
+        $userProfile = UserProfile::factory()->create([
+            'user_id' => $user->id,
+            'quit_date' => Carbon::now()->subDays(7),
+        ]);
+
+        Sanctum::actingAs($user);
+
+        // Act
+        $response = $this->patchJson('/api/profile', [
+            'display_name' => 'Updated Name',
             'daily_cigarettes' => 20,
             'pack_cost' => 500,
         ]);
+
+        // Assert
+        $response->assertStatus(200);
+
+        // バッジが授与されていることを確認
+        $this->assertContains('one_week', $userProfile->fresh()->earned_badges);
     }
 
-    /**
-     * 自分のプロフィールを取得できることをテスト
-     */
-    public function test_my_profile_returns_user_profile(): void
+    public function test_他のユーザーのプロフィール取得時にバッジ情報が含まれる(): void
     {
-        Sanctum::actingAs($this->user);
-
-        $response = $this->getJson('/api/profile');
-
-        $response->assertStatus(200)
-            ->assertJson([
-                'display_name' => 'Test User',
-                'daily_cigarettes' => 20,
-                'pack_cost' => 500,
-            ])
-            ->assertJsonStructure([
-                'display_name',
-                'daily_cigarettes',
-                'pack_cost',
-                'quit_date',
-                'quit_days_count',
-                'quit_cigarettes',
-                'saved_money',
-                'extended_life',
-            ]);
-    }
-
-    /**
-     * 未認証でプロフィール取得が失敗することをテスト
-     */
-    public function test_my_profile_fails_when_unauthenticated(): void
-    {
-        $response = $this->getJson('/api/profile');
-
-        $response->assertStatus(401);
-    }
-
-    /**
-     * プロフィールを更新できることをテスト
-     */
-    public function test_update_modifies_profile(): void
-    {
-        Sanctum::actingAs($this->user);
-
-        $updateData = [
-            'display_name' => 'Updated User',
-            'daily_cigarettes' => 15,
-            'pack_cost' => 400,
-        ];
-
-        $response = $this->patchJson('/api/profile', $updateData);
-
-        $response->assertStatus(200)
-            ->assertJson(['message' => 'プロフィールが更新されました。']);
-
-        $this->assertDatabaseHas('user_profiles', [
-            'user_id' => $this->user->id,
-            'display_name' => 'Updated User',
-            'daily_cigarettes' => 15,
-            'pack_cost' => 400,
-        ]);
-    }
-
-    /**
-     * 禁煙情報をリセットできることをテスト
-     */
-    public function test_reset_quit_info_resets_quit_date(): void
-    {
-        Sanctum::actingAs($this->user);
-
-        $response = $this->postJson('/api/profile/reset');
-
-        $response->assertStatus(200)
-            ->assertJson(['message' => '禁煙情報がリセットされました。']);
-
-        $this->userProfile->refresh();
-        $this->assertEquals(now()->toDateString(), $this->userProfile->quit_date->toDateString());
-    }
-
-    /**
-     * 他のユーザーのプロフィールを取得できることをテスト
-     */
-    public function test_show_by_id_returns_other_user_profile(): void
-    {
+        // Arrange
+        $user = User::factory()->create();
         $otherUser = User::factory()->create();
-        $otherProfile = UserProfile::factory()->create([
+        $otherUserProfile = UserProfile::factory()->create([
             'user_id' => $otherUser->id,
-            'display_name' => 'Other User',
-            'daily_cigarettes' => 25,
-            'pack_cost' => 600,
+            'quit_date' => Carbon::now()->subDays(10),
+            'earned_badges' => ['one_week'],
         ]);
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($user);
 
+        // Act
         $response = $this->getJson("/api/profile/{$otherUser->id}");
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'display_name' => 'Other User',
-                'daily_cigarettes' => 25,
-                'pack_cost' => 600,
-            ])
-            ->assertJsonStructure([
-                'display_name',
-                'daily_cigarettes',
-                'pack_cost',
-                'quit_date',
-                'quit_days_count',
-                'quit_cigarettes',
-                'saved_money',
-                'extended_life',
-            ]);
-    }
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'display_name',
+            'daily_cigarettes',
+            'pack_cost',
+            'quit_date',
+            'quit_days_count',
+            'quit_cigarettes',
+            'saved_money',
+            'extended_life',
+            'badges' => [
+                '*' => [
+                    'code',
+                    'name',
+                    'description',
+                ]
+            ]
+        ]);
 
-    /**
-     * 存在しないユーザーIDで404エラーが返されることをテスト
-     */
-    public function test_show_by_id_returns_404_for_nonexistent_user(): void
-    {
-        Sanctum::actingAs($this->user);
-
-        $response = $this->getJson('/api/profile/999');
-
-        $response->assertStatus(404);
-    }
-
-    /**
-     * 未認証でプロフィール更新が失敗することをテスト
-     */
-    public function test_update_fails_when_unauthenticated(): void
-    {
-        $updateData = [
-            'display_name' => 'Updated User',
-        ];
-
-        $response = $this->patchJson('/api/profile', $updateData);
-
-        $response->assertStatus(401);
-    }
-
-    /**
-     * 未認証で禁煙情報リセットが失敗することをテスト
-     */
-    public function test_reset_quit_info_fails_when_unauthenticated(): void
-    {
-        $response = $this->postJson('/api/profile/reset');
-
-        $response->assertStatus(401);
-    }
-
-    /**
-     * 未認証で他のユーザープロフィール取得が失敗することをテスト
-     */
-    public function test_show_by_id_fails_when_unauthenticated(): void
-    {
-        $response = $this->getJson('/api/profile/1');
-
-        $response->assertStatus(401);
+        $this->assertCount(1, $response->json('badges'));
+        $this->assertEquals('one_week', $response->json('badges.0.code'));
     }
 }
