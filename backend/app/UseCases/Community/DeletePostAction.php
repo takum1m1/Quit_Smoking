@@ -4,6 +4,7 @@ namespace App\UseCases\Community;
 
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class DeletePostAction
 {
@@ -19,6 +20,9 @@ class DeletePostAction
 
         // 投稿を削除
         $post->delete();
+
+        // 投稿一覧のキャッシュをクリア
+        Cache::forget('posts.all');
 
         return response()->json(['message' => '投稿は正常に削除されました。'], 200);
     }

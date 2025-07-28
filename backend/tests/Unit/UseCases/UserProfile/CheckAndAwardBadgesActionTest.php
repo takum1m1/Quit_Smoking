@@ -22,7 +22,7 @@ class CheckAndAwardBadgesActionTest extends TestCase
         $this->action = new CheckAndAwardBadgesAction();
     }
 
-    public function test_禁煙1週間で1週間バッジを授与する(): void
+    public function test_awards_one_week_badge_after_one_week_of_quitting(): void
     {
         // Arrange
         $user = User::factory()->create();
@@ -42,7 +42,7 @@ class CheckAndAwardBadgesActionTest extends TestCase
         $this->assertContains('one_week', $userProfile->fresh()->earned_badges);
     }
 
-    public function test_禁煙30日で1ヶ月バッジを授与する(): void
+    public function test_awards_one_month_badge_after_thirty_days_of_quitting(): void
     {
         // Arrange
         $user = User::factory()->create();
@@ -62,7 +62,7 @@ class CheckAndAwardBadgesActionTest extends TestCase
         $this->assertContains('one_month', $userProfile->fresh()->earned_badges);
     }
 
-    public function test_既に授与されたバッジは重複して授与しない(): void
+    public function test_does_not_award_duplicate_badges(): void
     {
         // Arrange
         $user = User::factory()->create();
@@ -82,7 +82,7 @@ class CheckAndAwardBadgesActionTest extends TestCase
         $this->assertCount(1, $userProfile->fresh()->earned_badges);
     }
 
-    public function test_複数のバッジを同時に授与する(): void
+    public function test_awards_multiple_badges_simultaneously(): void
     {
         // Arrange
         $user = User::factory()->create();

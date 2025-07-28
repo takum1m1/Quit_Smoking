@@ -47,9 +47,9 @@ services:
       DB_PASSWORD: root
 
       BROADCAST_DRIVER: log
-      CACHE_DRIVER: redis
-      QUEUE_CONNECTION: sync
-      SESSION_DRIVER: file
+      CACHE_STORE: redis
+      QUEUE_CONNECTION: redis
+      SESSION_DRIVER: redis
       SESSION_LIFETIME: 120
 
       REDIS_HOST: redis

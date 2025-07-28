@@ -5,6 +5,7 @@ namespace App\UseCases\UserProfile;
 use App\Models\UserProfile;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class CheckAndAwardBadgesAction
 {
@@ -42,6 +43,9 @@ class CheckAndAwardBadgesAction
         if (!empty($awardedBadges)) {
             $userProfile->earned_badges = $currentEarnedBadges;
             $userProfile->save();
+
+            // ユーザープロフィールのキャッシュをクリア
+            Cache::forget("user.profile.{$user->id}");
         }
 
         return $awardedBadges;

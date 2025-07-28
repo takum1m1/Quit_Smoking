@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\AdminPostController;
-use App\Http\Controllers\AdminCommentController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\PostController as AdminPostController;
+use App\Http\Controllers\Admin\CommentController as AdminCommentController;
 use Illuminate\Support\Facades\Route;
+// 一般用
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
@@ -72,10 +73,14 @@ Route::middleware('auth:sanctum', 'admin')->group(function () {
     Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy']);
     // 投稿一覧
     Route::get('/admin/posts', [AdminPostController::class, 'index']);
+    // 投稿詳細
+    Route::get('/admin/posts/{id}', [AdminPostController::class, 'show']);
     // 投稿削除
     Route::delete('/admin/posts/{id}', [AdminPostController::class, 'destroy']);
     // コメント一覧
     Route::get('/admin/comments', [AdminCommentController::class, 'index']);
+    // コメント詳細
+    Route::get('/admin/comments/{id}', [AdminCommentController::class, 'show']);
     // コメント削除
     Route::delete('/admin/comments/{id}', [AdminCommentController::class, 'destroy']);
 });

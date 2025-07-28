@@ -4,6 +4,7 @@ namespace App\UseCases\Community;
 
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class CreatePostAction
 {
@@ -16,7 +17,10 @@ class CreatePostAction
         $post->save();
 
         // 関連するモデルのロード
-        $post->load('user', 'comments', 'likes');
+        $post->load(['user.profile', 'comments', 'likes']);
+
+        // 投稿一覧のキャッシュをクリア
+        Cache::forget('posts.all');
 
         return $post;
     }

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\UseCases\Community\ListPostsAction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class ListPostsActionTest extends TestCase
@@ -19,6 +20,9 @@ class ListPostsActionTest extends TestCase
     {
         parent::setUp();
         $this->action = new ListPostsAction();
+
+        // テスト前にキャッシュをクリア
+        Cache::flush();
     }
 
     /**
@@ -37,6 +41,9 @@ class ListPostsActionTest extends TestCase
      */
     public function test_list_posts_when_posts_exist(): void
     {
+        // キャッシュをクリア
+        Cache::flush();
+
         // ユーザーと投稿を作成
         $user = User::factory()->create();
         $post1 = Post::factory()->create(['user_id' => $user->id]);
@@ -57,6 +64,9 @@ class ListPostsActionTest extends TestCase
      */
     public function test_list_posts_with_relations_loaded(): void
     {
+        // キャッシュをクリア
+        Cache::flush();
+
         $user = User::factory()->create();
         $post = Post::factory()->create(['user_id' => $user->id]);
 
@@ -78,6 +88,9 @@ class ListPostsActionTest extends TestCase
      */
     public function test_list_posts_from_multiple_users(): void
     {
+        // キャッシュをクリア
+        Cache::flush();
+
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
 
@@ -99,6 +112,9 @@ class ListPostsActionTest extends TestCase
      */
     public function test_list_posts_order(): void
     {
+        // キャッシュをクリア
+        Cache::flush();
+
         $user = User::factory()->create();
 
         // 古い投稿

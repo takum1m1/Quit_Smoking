@@ -13,7 +13,7 @@ class UserProfileControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_プロフィール取得時にバッジ情報が含まれる(): void
+    public function test_profile_includes_badge_information(): void
     {
         // Arrange
         $user = User::factory()->create();
@@ -52,7 +52,7 @@ class UserProfileControllerTest extends TestCase
         $this->assertEquals('one_week', $response->json('badges.0.code'));
     }
 
-    public function test_バッジチェックエンドポイントが正常に動作する(): void
+    public function test_badge_check_endpoint_works_correctly(): void
     {
         // Arrange
         $user = User::factory()->create();
@@ -83,7 +83,7 @@ class UserProfileControllerTest extends TestCase
         $this->assertEquals('one_week', $response->json('awarded_badges.0.code'));
     }
 
-    public function test_プロフィール更新時にバッジチェックが実行される(): void
+    public function test_badge_check_executes_on_profile_update(): void
     {
         // Arrange
         $user = User::factory()->create();
@@ -108,7 +108,7 @@ class UserProfileControllerTest extends TestCase
         $this->assertContains('one_week', $userProfile->fresh()->earned_badges);
     }
 
-    public function test_他のユーザーのプロフィール取得時にバッジ情報が含まれる(): void
+    public function test_other_user_profile_includes_badge_information(): void
     {
         // Arrange
         $user = User::factory()->create();

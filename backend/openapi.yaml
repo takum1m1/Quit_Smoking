@@ -1,0 +1,768 @@
+openapi: 3.0.3
+info:
+  title: 禁煙支援アプリケーション API
+  description: 禁煙支援コミュニティアプリケーションのバックエンドAPIです。ユーザーの禁煙進捗管理、コミュニティ機能、バッジシステムを提供します。
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000/api
+    description: 開発環境
+  - url: https://api.quitsmoking.com/api
+    description: 本番環境
+
+security:
+  - BearerAuth: []
+
+paths:
+  /register:
+    post:
+      tags:
+        - 認証
+      summary: ユーザー登録
+      description: 新しいユーザーを登録します
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              email: "user@example.com"
+              password: "password123"
+              password_confirmation: "password123"
+              display_name: "禁煙チャレンジャー"
+              daily_cigarettes: 20
+              pack_cost: 500
+      responses:
+        '201':
+          description: ユーザー登録成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '422':
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /login:
+    post:
+      tags:
+        - 認証
+      summary: ログイン
+      description: ユーザーログインを行います
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: "user@example.com"
+              password: "password123"
+      responses:
+        '200':
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: ログイン失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /logout:
+    post:
+      tags:
+        - 認証
+      summary: ログアウト
+      description: ユーザーログアウトを行います
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: ログアウト成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /profile:
+    get:
+      tags:
+        - プロフィール
+      summary: 自分のプロフィール取得
+      description: 認証済みユーザーのプロフィール情報を取得します
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: プロフィール取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+    patch:
+      tags:
+        - プロフィール
+      summary: プロフィール更新
+      description: ユーザーのプロフィール情報を更新します
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdateRequest'
+      responses:
+        '200':
+          description: プロフィール更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /profile/check-badges:
+    post:
+      tags:
+        - プロフィール
+      summary: バッジチェック
+      description: ユーザーのバッジ獲得状況をチェックします
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: バッジチェック完了
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadgeCheckResponse'
+
+  /profile/reset:
+    post:
+      tags:
+        - プロフィール
+      summary: 禁煙情報リセット
+      description: 禁煙開始日をリセットします
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: リセット成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /profile/{id}:
+    get:
+      tags:
+        - プロフィール
+      summary: 他のユーザーのプロフィール取得
+      description: 指定されたユーザーのプロフィール情報を取得します
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ユーザーID
+      responses:
+        '200':
+          description: プロフィール取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+
+  /posts:
+    get:
+      tags:
+        - コミュニティ
+      summary: 投稿一覧取得
+      description: すべての投稿を取得します
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 投稿一覧取得成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+    post:
+      tags:
+        - コミュニティ
+      summary: 投稿作成
+      description: 新しい投稿を作成します
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreateRequest'
+      responses:
+        '201':
+          description: 投稿作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+  /posts/{id}:
+    get:
+      tags:
+        - コミュニティ
+      summary: 投稿詳細取得
+      description: 指定された投稿の詳細を取得します
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 投稿ID
+      responses:
+        '200':
+          description: 投稿詳細取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDetail'
+    put:
+      tags:
+        - コミュニティ
+      summary: 投稿更新
+      description: 投稿を更新します（投稿者のみ）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 投稿ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostUpdateRequest'
+      responses:
+        '200':
+          description: 投稿更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+    delete:
+      tags:
+        - コミュニティ
+      summary: 投稿削除
+      description: 投稿を削除します（投稿者のみ）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 投稿ID
+      responses:
+        '200':
+          description: 投稿削除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /posts/{postId}/comments:
+    post:
+      tags:
+        - コミュニティ
+      summary: コメント作成
+      description: 投稿にコメントを追加します
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 投稿ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequest'
+      responses:
+        '201':
+          description: コメント作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+
+  /posts/{postId}/comments/{commentId}:
+    delete:
+      tags:
+        - コミュニティ
+      summary: コメント削除
+      description: コメントを削除します（コメント投稿者のみ）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 投稿ID
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: コメントID
+      responses:
+        '200':
+          description: コメント削除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /posts/{postId}/like:
+    post:
+      tags:
+        - コミュニティ
+      summary: いいね
+      description: 投稿にいいねを追加します
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 投稿ID
+      responses:
+        '200':
+          description: いいね成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /posts/{postId}/unlike:
+    post:
+      tags:
+        - コミュニティ
+      summary: いいね解除
+      description: 投稿のいいねを解除します
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 投稿ID
+      responses:
+        '200':
+          description: いいね解除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /admin/users:
+    get:
+      tags:
+        - 管理者
+      summary: ユーザー一覧取得（管理者）
+      description: すべてのユーザーを取得します（管理者のみ）
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: ユーザー一覧取得成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminUser'
+
+  /admin/users/{id}:
+    get:
+      tags:
+        - 管理者
+      summary: ユーザー詳細取得（管理者）
+      description: 指定されたユーザーの詳細を取得します（管理者のみ）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ユーザーID
+      responses:
+        '200':
+          description: ユーザー詳細取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUser'
+    delete:
+      tags:
+        - 管理者
+      summary: ユーザー削除（管理者）
+      description: ユーザーを削除します（管理者のみ）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ユーザーID
+      responses:
+        '200':
+          description: ユーザー削除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - password_confirmation
+        - display_name
+        - daily_cigarettes
+        - pack_cost
+      properties:
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+        password:
+          type: string
+          minLength: 8
+          description: パスワード（8文字以上、文字を含む）
+        password_confirmation:
+          type: string
+          description: パスワード確認
+        display_name:
+          type: string
+          maxLength: 20
+          description: 表示名
+        daily_cigarettes:
+          type: integer
+          minimum: 1
+          description: 1日の喫煙本数
+        pack_cost:
+          type: integer
+          minimum: 300
+          maximum: 3000
+          description: 1箱の価格
+
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "ユーザー登録が成功しました。"
+        token:
+          type: string
+          description: 認証トークン
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "ログインが成功しました。"
+        token:
+          type: string
+          description: 認証トークン
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    ProfileResponse:
+      type: object
+      properties:
+        display_name:
+          type: string
+        daily_cigarettes:
+          type: integer
+        pack_cost:
+          type: integer
+        quit_date:
+          type: string
+          format: date
+        quit_days_count:
+          type: integer
+        quit_cigarettes:
+          type: integer
+        saved_money:
+          type: number
+        extended_life:
+          type: integer
+        badges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Badge'
+
+    ProfileUpdateRequest:
+      type: object
+      required:
+        - display_name
+        - daily_cigarettes
+        - pack_cost
+      properties:
+        display_name:
+          type: string
+          maxLength: 20
+        daily_cigarettes:
+          type: integer
+          minimum: 1
+        pack_cost:
+          type: integer
+          minimum: 300
+          maximum: 3000
+
+    BadgeCheckResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "バッジチェックが完了しました。"
+        awarded_badges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Badge'
+
+    Badge:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "one_week"
+        name:
+          type: string
+          example: "1週間達成"
+        description:
+          type: string
+          example: "禁煙を1週間続けました！素晴らしいスタートです。"
+
+    PostCreateRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+
+    PostUpdateRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/User'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+        likes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Like'
+
+    PostDetail:
+      allOf:
+        - $ref: '#/components/schemas/Post'
+
+    CommentCreateRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/User'
+
+    Like:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+
+    UserProfile:
+      type: object
+      properties:
+        display_name:
+          type: string
+
+    AdminUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        role:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        profile:
+          $ref: '#/components/schemas/AdminUserProfile'
+
+    AdminUserProfile:
+      type: object
+      properties:
+        display_name:
+          type: string
+        quit_date:
+          type: string
+          format: date
+        earned_badges:
+          type: array
+          items:
+            type: string
+
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "The given data was invalid."
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+tags:
+  - name: 認証
+    description: ユーザー認証関連のエンドポイント
+  - name: プロフィール
+    description: ユーザープロフィール関連のエンドポイント
+  - name: コミュニティ
+    description: 投稿・コメント・いいね関連のエンドポイント
+  - name: 管理者
+    description: 管理者専用のエンドポイント

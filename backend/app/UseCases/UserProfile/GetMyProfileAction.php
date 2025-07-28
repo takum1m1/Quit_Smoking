@@ -5,6 +5,7 @@ namespace App\UseCases\UserProfile;
 use App\Models\UserProfile;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class GetMyProfileAction
 {
@@ -16,34 +17,40 @@ class GetMyProfileAction
     public function __invoke() : array
     {
         $user = Auth::user();
-        $userProfile = UserProfile::where('user_id', $user->id)->firstOrFail();
 
-        $quitDate = $userProfile->quit_date;
-        $now = CarbonImmutable::now();
+        // ユーザープロフィールをキャッシュから取得（30分間キャッシュ）
+        $profileData = Cache::remember("user.profile.{$user->id}", 1800, function () use ($user) {
+            $userProfile = UserProfile::where('user_id', $user->id)->firstOrFail();
 
-        $dailyCigarettes = $userProfile->daily_cigarettes;
-        $packCost = $userProfile->pack_cost;
+            $quitDate = $userProfile->quit_date;
+            $now = CarbonImmutable::now();
 
-        $quitDaysCount = $quitDate->diffInDays($now);
+            $dailyCigarettes = $userProfile->daily_cigarettes;
+            $packCost = $userProfile->pack_cost;
 
-        $quitCigarettes = $dailyCigarettes * $quitDaysCount;
-        $savedMoney = ($packCost * $quitCigarettes) / 20;
-        $extendedLife = $quitCigarettes * 10; // 1本あたり10分
+            $quitDaysCount = $quitDate->diffInDays($now);
 
-        // バッジ情報を取得
-        $badges = $this->getBadgesInfo($userProfile->earned_badges ?? []);
+            $quitCigarettes = $dailyCigarettes * $quitDaysCount;
+            $savedMoney = ($packCost * $quitCigarettes) / 20;
+            $extendedLife = $quitCigarettes * 10; // 1本あたり10分
 
-        return [
-            'display_name'     => $userProfile->display_name,
-            'daily_cigarettes' => $dailyCigarettes,
-            'pack_cost'        => $packCost,
-            'quit_date'        => $quitDate->toDateString(),
-            'quit_days_count'  => $quitDaysCount,
-            'quit_cigarettes'  => $quitCigarettes,
-            'saved_money'      => $savedMoney,
-            'extended_life'    => $extendedLife,
-            'badges'           => $badges,
-        ];
+            // バッジ情報を取得
+            $badges = $this->getBadgesInfo($userProfile->earned_badges ?? []);
+
+            return [
+                'display_name'     => $userProfile->display_name,
+                'daily_cigarettes' => $dailyCigarettes,
+                'pack_cost'        => $packCost,
+                'quit_date'        => $quitDate->toDateString(),
+                'quit_days_count'  => $quitDaysCount,
+                'quit_cigarettes'  => $quitCigarettes,
+                'saved_money'      => $savedMoney,
+                'extended_life'    => $extendedLife,
+                'badges'           => $badges,
+            ];
+        });
+
+        return $profileData;
     }
 
     /**
