@@ -30,8 +30,7 @@
 - **Redis 7** (キャッシュ・セッション管理)
 - **Laravel Sanctum** (API認証)
 
-### 開発・テスト
-- **PHPUnit** (テストフレームワーク)
+### 開発環境
 - **Docker** (コンテナ化)
 - **Docker Compose** (マルチコンテナ管理)
 
