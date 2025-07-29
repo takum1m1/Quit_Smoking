@@ -1,6 +1,6 @@
-# 禁煙支援アプリケーション
+# 禁煙支援アプリケーションAPI
 
-禁煙を志す人々をサポートするコミュニティアプリケーションです。禁煙の進捗管理、コミュニティ機能、バッジシステムを通じて、ユーザーの禁煙成功を支援します。
+禁煙を志す人々をサポートするコミュニティアプリケーションのAPIです。禁煙の進捗管理、コミュニティ機能、バッジシステムを通じて、ユーザーの禁煙成功を支援します。
 
 ## 🚀 機能
 
@@ -24,16 +24,16 @@
 ## 🛠 技術スタック
 
 ### バックエンド
-- **PHP 8.2**
+- **PHP 8.4**
 - **Laravel 12**
-- **MySQL 8.0**
-- **Redis** (キャッシュ・セッション管理)
+- **MySQL 8.4**
+- **Redis 7** (キャッシュ・セッション管理)
 - **Laravel Sanctum** (API認証)
 
 ### 開発・テスト
 - **PHPUnit** (テストフレームワーク)
-- **Laravel Sail** (開発環境)
 - **Docker** (コンテナ化)
+- **Docker Compose** (マルチコンテナ管理)
 
 ## 📁 プロジェクト構造
 
@@ -51,70 +51,116 @@ Quit_Smoking/
 │   │   ├── Feature/         # 統合テスト
 │   │   └── Unit/            # 単体テスト
 │   └── routes/api.php       # APIルート
-├── frontend/                # フロントエンド（将来実装予定）
-└── docker/                  # Docker設定
+├── docker/                  # Docker設定
+│   └── backend/
+│       └── Dockerfile       # PHP環境の設定
+├── docker-compose.yml       # コンテナ構成
+└── frontend/                # フロントエンド（将来実装予定）
 ```
 
-## 🚀 セットアップ
+## 🐳 Docker環境でのセットアップ
 
 ### 前提条件
-- PHP 8.2以上
-- Composer
-- MySQL 8.0
-- Redis
-- Docker (推奨)
+- **Docker Desktop** がインストールされていること
+- **Git** がインストールされていること
 
-### 1. リポジトリのクローン
+### 🚀 簡単セットアップ（推奨）
+
+#### 1. リポジトリのクローン
 ```bash
 git clone https://github.com/your-username/quit-smoking.git
 cd quit-smoking
 ```
 
-### 2. バックエンドのセットアップ
+#### 2. 環境変数ファイルの作成
 ```bash
+# バックエンドディレクトリに移動
 cd backend
 
-# 依存関係のインストール
-composer install
-
-# 環境変数ファイルの作成
+# 環境変数ファイルを作成
 cp .env.example .env
-
-# アプリケーションキーの生成
-php artisan key:generate
-
-# データベースの設定
-# .envファイルでデータベース接続情報を設定
-
-# マイグレーションの実行
-php artisan migrate
-
-# シーダーの実行（オプション）
-php artisan db:seed
-
-# Redisの起動
-redis-server
-
-# 開発サーバーの起動
-php artisan serve
 ```
 
-### 3. テストの実行
+#### 3. Docker環境の起動
+```bash
+# プロジェクトルートに戻る
+cd ..
+
+# Dockerコンテナを起動
+docker-compose up -d
+```
+
+#### 4. アプリケーションの初期化
+```bash
+# アプリケーションキーの生成
+docker-compose exec backend php artisan key:generate
+
+# データベースのマイグレーション
+docker-compose exec backend php artisan migrate
+
+# テストデータの作成（オプション）
+docker-compose exec backend php artisan db:seed
+```
+
+#### 5. アクセス確認
+- **API**: http://localhost:8000/api
+- **ヘルスチェック**: http://localhost:8000/api/health
+
+### 🔧 開発用コマンド
+
+#### コンテナの管理
+```bash
+# コンテナの起動
+docker-compose up -d
+
+# コンテナの停止
+docker-compose down
+
+# ログの確認
+docker-compose logs backend
+
+# コンテナ内でコマンド実行
+docker-compose exec backend php artisan list
+```
+
+#### テストの実行
 ```bash
 # 全テストの実行
-php artisan test
+docker-compose exec backend php artisan test
 
-# テストカバレッジの確認
-php artisan test --coverage-text
+# 特定のテストファイル
+docker-compose exec backend php artisan test tests/Feature/Http/Controllers/AuthControllerTest.php
+
+# テストカバレッジ
+docker-compose exec backend php artisan test --coverage-text
 ```
 
-## 📚 API ドキュメント
+#### データベース操作
+```bash
+# マイグレーション
+docker-compose exec backend php artisan migrate
 
-詳細なAPI仕様書は以下のファイルを参照してください：
+# ロールバック
+docker-compose exec backend php artisan migrate:rollback
 
-- [API仕様書](./backend/API_DOCUMENTATION.md)
-- [OpenAPI仕様](./backend/openapi.yaml)
-- [API README](./backend/API_README.md)
+# シーダー実行
+docker-compose exec backend php artisan db:seed
+
+# データベースリセット
+docker-compose exec backend php artisan migrate:fresh --seed
+```
+
+#### キャッシュ管理
+```bash
+# キャッシュの状態確認
+docker-compose exec backend php artisan cache:status
+
+# 全キャッシュクリア
+docker-compose exec backend php artisan cache:clear-all
+
+# 設定キャッシュクリア
+docker-compose exec backend php artisan config:clear
+```
 
 ### 主要なエンドポイント
 
@@ -146,34 +192,10 @@ php artisan test --coverage-text
 ### テストの実行
 ```bash
 # 全テストの実行
-php artisan test
+docker-compose exec backend php artisan test
 
 # 特定のテストファイルの実行
-php artisan test tests/Feature/Http/Controllers/AuthControllerTest.php
-
-# テストカバレッジの確認
-php artisan test --coverage-text
-```
-
-## 🔧 開発環境
-
-### Docker環境の使用（推奨）
-```bash
-# Docker環境の起動
-docker-compose up -d
-
-# コンテナ内でコマンド実行
-docker-compose exec backend php artisan migrate
-docker-compose exec backend php artisan test
-```
-
-### キャッシュ管理
-```bash
-# キャッシュの状態確認
-php artisan cache:status
-
-# 全キャッシュクリア
-php artisan cache:clear-all
+docker-compose exec backend php artisan test tests/Feature/Http/Controllers/AuthControllerTest.php
 ```
 
 ## 📊 プロジェクトの特徴
@@ -181,37 +203,22 @@ php artisan cache:clear-all
 ### アーキテクチャ
 - **クリーンアーキテクチャ**: ビジネスロジックとプレゼンテーション層の分離
 - **UseCase層**: 複雑なビジネスロジックの集約
-- **Repository Pattern**: データアクセス層の抽象化
 
 ### セキュリティ
 - **Laravel Sanctum**: 安全なAPI認証
 - **バリデーション**: 包括的な入力検証
-- **SQLインジェクション対策**: Eloquent ORMの使用
 
 ### パフォーマンス
 - **Redisキャッシュ**: 投稿一覧とユーザープロフィールのキャッシュ
-- **データベース最適化**: 適切なインデックスとリレーション
-- **N+1問題対策**: Eager Loadingの活用
-
-## 🤝 コントリビューション
-
-1. このリポジトリをフォーク
-2. 機能ブランチを作成 (`git checkout -b feature/amazing-feature`)
-3. 変更をコミット (`git commit -m 'Add some amazing feature'`)
-4. ブランチにプッシュ (`git push origin feature/amazing-feature`)
-5. プルリクエストを作成
-
-## 📝 ライセンス
-
-このプロジェクトはMITライセンスの下で公開されています。詳細は[LICENSE](LICENSE)ファイルを参照してください。
 
 ## 👨‍💻 作者
 
-- **名前**: [あなたの名前]
-- **GitHub**: [@your-username](https://github.com/your-username)
+- **名前**: [桐木 拓海]
+- **GitHub**: [@takum1m1](https://github.com/takum1m1)
 
-## 🙏 謝辞
-
-- [Laravel](https://laravel.com/) - 素晴らしいPHPフレームワーク
-- [Laravel Sanctum](https://laravel.com/docs/sanctum) - API認証
-- [PHPUnit](https://phpunit.de/) - テストフレームワーク
+## 今後の展望
+- フロントエンドの実装
+- 外部サービス連携
+- デプロイ、リリースの経験
+- さらにAIを活用した効率的な開発
+- API仕様書等の作成
