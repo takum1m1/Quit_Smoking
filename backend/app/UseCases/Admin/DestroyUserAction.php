@@ -10,6 +10,5 @@ class DestroyUserAction
     {
         $user = User::findOrFail($id);
         $user->delete();
-        return ['message' => 'ユーザーは正常に削除されました。'];
     }
 }

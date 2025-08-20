@@ -19,19 +19,15 @@ class AuthController extends Controller
 {
     public function register(RegisterRequest $req, RegisterAction $action)
     {
-        //　リクエストのバリデーションはRegisterRequestで行われるため、ここではバリデーション済みのデータを使用します。
         $token = $action($req->validated());
-        // ユーザー登録が成功した場合、トークンを返します。
         return response()->json(['message' => 'ユーザー登録が成功しました。', 'token' => $token], 201);
     }
 
     public function login(LoginRequest $req, LoginAction $action)
     {
         if ($token = $action($req->validated())) {
-            // ログインが成功した場合、トークンを返します。
             return response()->json(['message' => 'ログインが成功しました。', 'token' => $token], 200);
         }
-        // ログインが失敗した場合、エラーメッセージを返します。
         return response()->json(['message' => 'ログインに失敗しました。メールアドレスまたはパスワードが正しくありません。'], 401);
     }
 
@@ -49,9 +45,7 @@ class AuthController extends Controller
 
     public function resetPassword(ResetPasswordRequest $req, ResetPasswordAction $action, string $token)
     {
-        // リクエストのバリデーションはResetPasswordRequestで行われるため、ここではバリデーション済みのデータを使用します。
         $action($req->validated(), $token);
-
         return response()->json(['message' => 'パスワードがリセットされました。'], 200);
     }
 

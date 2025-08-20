@@ -12,7 +12,7 @@ class CreatePostRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // 認証が必要な場合は、ここでチェックを行う
+        return true;
     }
 
     /**
@@ -23,7 +23,7 @@ class CreatePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'content' => 'required|string|max:200', // 投稿内容は必須で、文字列で最大200文字
+            'content' => 'required|string|max:200',
         ];
     }
 }

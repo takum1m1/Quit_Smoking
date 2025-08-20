@@ -33,11 +33,7 @@ class DeletePostActionTest extends TestCase
 
         Auth::login($user);
 
-        $result = $this->action->__invoke($post->id);
-
-        // レスポンスの確認
-        $this->assertEquals(200, $result->getStatusCode());
-        $this->assertEquals(['message' => '投稿は正常に削除されました。'], $result->getData(true));
+        $this->action->__invoke($post->id);
 
         // データベースから削除されていることを確認（ソフトデリート）
         $this->assertSoftDeleted('posts', ['id' => $post->id]);
@@ -103,13 +99,11 @@ class DeletePostActionTest extends TestCase
         Auth::login($user);
 
         // 1つ目の投稿を削除
-        $result1 = $this->action->__invoke($post1->id);
-        $this->assertEquals(200, $result1->getStatusCode());
+        $this->action->__invoke($post1->id);
         $this->assertSoftDeleted('posts', ['id' => $post1->id]);
 
         // 2つ目の投稿を削除
-        $result2 = $this->action->__invoke($post2->id);
-        $this->assertEquals(200, $result2->getStatusCode());
+        $this->action->__invoke($post2->id);
         $this->assertSoftDeleted('posts', ['id' => $post2->id]);
 
         // 両方の投稿が削除されていることを確認
@@ -131,8 +125,7 @@ class DeletePostActionTest extends TestCase
         Auth::login($user1);
 
         // user1の投稿を削除
-        $result = $this->action->__invoke($post1->id);
-        $this->assertEquals(200, $result->getStatusCode());
+        $this->action->__invoke($post1->id);
 
         // user1の投稿は削除されている
         $this->assertSoftDeleted('posts', ['id' => $post1->id]);

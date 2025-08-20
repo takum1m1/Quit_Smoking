@@ -9,7 +9,6 @@ class DestroyAction
 {
     public function __invoke(User $user)
     {
-        // ユーザーを削除
         $user->delete();
     }
 }

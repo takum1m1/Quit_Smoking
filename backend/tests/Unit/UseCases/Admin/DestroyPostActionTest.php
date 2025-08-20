@@ -15,8 +15,7 @@ class DestroyPostActionTest extends TestCase
     {
         $post = Post::factory()->create();
         $action = new DestroyPostAction();
-        $result = $action($post->id);
+        $action($post->id);
         $this->assertSoftDeleted('posts', ['id' => $post->id]);
-        $this->assertEquals('投稿は正常に削除されました。', $result['message']);
     }
 }

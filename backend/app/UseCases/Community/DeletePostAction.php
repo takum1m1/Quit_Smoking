@@ -23,7 +23,5 @@ class DeletePostAction
 
         // 投稿一覧のキャッシュをクリア
         Cache::forget('posts.all');
-
-        return response()->json(['message' => '投稿は正常に削除されました。'], 200);
     }
 }

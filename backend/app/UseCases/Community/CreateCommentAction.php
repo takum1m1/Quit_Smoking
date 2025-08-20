@@ -10,17 +10,14 @@ class CreateCommentAction
 {
     public function __invoke(array $data, $postId)
     {
-        // 投稿の存在チェック
         $post = Post::findOrFail($postId);
 
-        // コメントを作成
         $comment = new Comment();
         $comment->user_id = Auth::id();
         $comment->post_id = $postId;
         $comment->content = $data['content'];
         $comment->save();
 
-        // 関連するモデルのロード
         $comment->load('user');
 
         return $comment;

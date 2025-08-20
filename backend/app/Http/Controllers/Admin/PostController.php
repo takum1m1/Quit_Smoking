@@ -22,7 +22,7 @@ class PostController extends Controller
 
     public function destroy($id, DestroyPostAction $action)
     {
-        $result = $action($id);
-        return response()->json($result, 200);
+        $action($id);
+        return response()->json(['message' => '投稿は正常に削除されました。'], 200);
     }
 }

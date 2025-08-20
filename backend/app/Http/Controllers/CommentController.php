@@ -17,8 +17,7 @@ class CommentController extends Controller
 
     public function destroy(DeleteCommentAction $action, $postId, $commentId)
     {
-        return $action($postId, $commentId);
-        // ここでは、アクションが成功した場合に自動的にJSONレスポンスを返すようにしています。
+        $action($postId, $commentId);
         return response()->json(['message' => 'コメント削除成功'], 200);
     }
 }

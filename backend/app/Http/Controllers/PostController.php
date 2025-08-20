@@ -15,14 +15,12 @@ class PostController extends Controller
 {
     public function index(ListPostsAction $action)
     {
-        // 投稿一覧を取得
         $posts = $action();
         return response()->json($posts, 200);
     }
 
     public function show($id, ShowPostAction $action)
     {
-        // 特定の投稿を取得
         $post = $action($id);
         return response()->json($post, 200);
     }
@@ -33,15 +31,15 @@ class PostController extends Controller
         return response()->json($post, 201);
     }
 
-    public function update(UpdatePostRequest $request, UpdatePostAction $action, $id)
+    public function update(UpdatePostRequest $req, UpdatePostAction $action, $id)
     {
-        $post = $action($id, $request->validated());
+        $post = $action($id, $req->validated());
         return response()->json($post, 200);
     }
 
     public function destroy(DeletePostAction $action, $id)
     {
-        return $action($id);
+        $action($id);
         return response()->json(['message' => '投稿は正常に削除されました。'], 200);
     }
 }

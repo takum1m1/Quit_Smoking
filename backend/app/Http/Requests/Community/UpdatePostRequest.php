@@ -22,7 +22,7 @@ class UpdatePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'content' => 'required|string|max:200', // 投稿内容は必須で、文字列で最大200文字
+            'content' => 'required|string|max:200',
         ];
     }
 }

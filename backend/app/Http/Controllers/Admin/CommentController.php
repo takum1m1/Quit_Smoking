@@ -22,7 +22,7 @@ class CommentController extends Controller
 
     public function destroy($id, DestroyCommentAction $action)
     {
-        $result = $action($id);
-        return response()->json($result, 200);
+        $action($id);
+        return response()->json(['message' => 'コメントは正常に削除されました。'], 200);
     }
 }

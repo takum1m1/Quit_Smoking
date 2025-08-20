@@ -13,10 +13,8 @@ class UserProfileController extends Controller
 {
     public function myProfile(GetMyProfileAction $action)
     {
-        // ユーザープロフィールを取得
         $profile = $action();
 
-        // プロフィール情報を返す
         return response()->json($profile, 200);
     }
 
@@ -36,19 +34,15 @@ class UserProfileController extends Controller
 
     public function showById(int $id, GetByIdProfileAction $action)
     {
-        // 他のユーザーのプロフィールを取得
         $profile = $action($id);
 
-        // プロフィール情報を返す
         return response()->json($profile, 200);
     }
 
     public function checkBadges(CheckAndAwardBadgesAction $action)
     {
-        // バッジチェックを実行
         $awardedBadges = $action();
 
-        // バッジ情報を返す
         return response()->json([
             'message' => 'バッジチェックが完了しました。',
             'awarded_badges' => $awardedBadges,

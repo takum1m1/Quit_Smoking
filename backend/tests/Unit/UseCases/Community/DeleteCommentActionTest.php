@@ -37,11 +37,7 @@ class DeleteCommentActionTest extends TestCase
 
         Auth::login($user);
 
-        $result = $this->action->__invoke($post->id, $comment->id);
-
-        // レスポンスの確認
-        $this->assertEquals(200, $result->getStatusCode());
-        $this->assertEquals(['message' => 'Comment deleted successfully'], $result->getData(true));
+        $this->action->__invoke($post->id, $comment->id);
 
         // データベースから削除されていることを確認（ソフトデリート）
         $this->assertSoftDeleted('comments', ['id' => $comment->id]);
@@ -143,13 +139,11 @@ class DeleteCommentActionTest extends TestCase
         Auth::login($user);
 
         // 1つ目のコメントを削除
-        $result1 = $this->action->__invoke($post->id, $comment1->id);
-        $this->assertEquals(200, $result1->getStatusCode());
+        $this->action->__invoke($post->id, $comment1->id);
         $this->assertSoftDeleted('comments', ['id' => $comment1->id]);
 
         // 2つ目のコメントを削除
-        $result2 = $this->action->__invoke($post->id, $comment2->id);
-        $this->assertEquals(200, $result2->getStatusCode());
+        $this->action->__invoke($post->id, $comment2->id);
         $this->assertSoftDeleted('comments', ['id' => $comment2->id]);
 
         // 両方のコメントが削除されていることを確認
@@ -178,8 +172,7 @@ class DeleteCommentActionTest extends TestCase
         Auth::login($user1);
 
         // user1のコメントを削除
-        $result = $this->action->__invoke($post->id, $comment1->id);
-        $this->assertEquals(200, $result->getStatusCode());
+        $this->action->__invoke($post->id, $comment1->id);
 
         // user1のコメントは削除されている
         $this->assertSoftDeleted('comments', ['id' => $comment1->id]);

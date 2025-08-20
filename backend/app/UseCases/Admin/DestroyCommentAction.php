@@ -10,6 +10,5 @@ class DestroyCommentAction
     {
         $comment = Comment::findOrFail($id);
         $comment->delete();
-        return ['message' => 'コメントは正常に削除されました。'];
     }
 }

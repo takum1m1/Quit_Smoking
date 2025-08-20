@@ -31,16 +31,7 @@ class ShowPostActionTest extends TestCase
         $user = User::factory()->create();
         $post = Post::factory()->create(['user_id' => $user->id]);
 
-        // リクエストをモック
-        $request = Request::create("/api/posts/{$post->id}");
-        $request->setRouteResolver(function () use ($request) {
-            return Route::get("/api/posts/{id}", function () {})->bind($request);
-        });
-        $request->route()->setParameter('id', $post->id);
-
-        app()->instance('request', $request);
-
-        $result = $this->action->__invoke();
+        $result = $this->action->__invoke($post->id);
 
         $this->assertInstanceOf(Post::class, $result);
         $this->assertEquals($post->id, $result->id);
@@ -56,16 +47,7 @@ class ShowPostActionTest extends TestCase
         $user = User::factory()->create();
         $post = Post::factory()->create(['user_id' => $user->id]);
 
-        // リクエストをモック
-        $request = Request::create("/api/posts/{$post->id}");
-        $request->setRouteResolver(function () use ($request) {
-            return Route::get("/api/posts/{id}", function () {})->bind($request);
-        });
-        $request->route()->setParameter('id', $post->id);
-
-        app()->instance('request', $request);
-
-        $result = $this->action->__invoke();
+        $result = $this->action->__invoke($post->id);
 
         // リレーションがロードされていることを確認
         $this->assertTrue($result->relationLoaded('user'));
@@ -83,16 +65,7 @@ class ShowPostActionTest extends TestCase
     {
         $this->expectException(ModelNotFoundException::class);
 
-        // 存在しないIDでリクエストをモック
-        $request = Request::create("/api/posts/999");
-        $request->setRouteResolver(function () use ($request) {
-            return Route::get("/api/posts/{id}", function () {})->bind($request);
-        });
-        $request->route()->setParameter('id', 999);
-
-        app()->instance('request', $request);
-
-        $this->action->__invoke();
+        $this->action->__invoke(999);
     }
 
         /**
@@ -108,16 +81,7 @@ class ShowPostActionTest extends TestCase
 
         $this->expectException(ModelNotFoundException::class);
 
-        // リクエストをモック
-        $request = Request::create("/api/posts/{$post->id}");
-        $request->setRouteResolver(function () use ($request) {
-            return Route::get("/api/posts/{id}", function () {})->bind($request);
-        });
-        $request->route()->setParameter('id', $post->id);
-
-        app()->instance('request', $request);
-
-        $this->action->__invoke();
+        $this->action->__invoke($post->id);
     }
 
         /**
@@ -131,16 +95,7 @@ class ShowPostActionTest extends TestCase
         // コメントとライクを作成（実際のモデルが存在する場合）
         // このテストは実際のCommentとLikeモデルが実装された後に有効になります
 
-        // リクエストをモック
-        $request = Request::create("/api/posts/{$post->id}");
-        $request->setRouteResolver(function () use ($request) {
-            return Route::get("/api/posts/{id}", function () {})->bind($request);
-        });
-        $request->route()->setParameter('id', $post->id);
-
-        app()->instance('request', $request);
-
-        $result = $this->action->__invoke();
+        $result = $this->action->__invoke($post->id);
 
         $this->assertInstanceOf(Post::class, $result);
         $this->assertEquals($post->id, $result->id);

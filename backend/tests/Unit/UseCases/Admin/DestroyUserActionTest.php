@@ -15,8 +15,7 @@ class DestroyUserActionTest extends TestCase
     {
         $user = User::factory()->create();
         $action = new DestroyUserAction();
-        $result = $action($user->id);
+        $action($user->id);
         $this->assertSoftDeleted('users', ['id' => $user->id]);
-        $this->assertEquals('ユーザーは正常に削除されました。', $result['message']);
     }
 }

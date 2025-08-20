@@ -10,13 +10,11 @@ class CreatePostAction
 {
     public function __invoke(array $data)
     {
-        // 投稿を作成
         $post = new Post();
         $post->user_id = Auth::id();
         $post->content = $data['content'];
         $post->save();
 
-        // 関連するモデルのロード
         $post->load(['user.profile', 'comments', 'likes']);
 
         // 投稿一覧のキャッシュをクリア

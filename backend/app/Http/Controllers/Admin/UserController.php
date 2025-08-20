@@ -22,7 +22,7 @@ class UserController extends Controller
 
     public function destroy($id, DestroyUserAction $action)
     {
-        $result = $action($id);
-        return response()->json($result, 200);
+        $action($id);
+        return response()->json(['message' => 'ユーザーは正常に削除されました。'], 200);
     }
 }

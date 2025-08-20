@@ -15,8 +15,7 @@ class DestroyCommentActionTest extends TestCase
     {
         $comment = Comment::factory()->create();
         $action = new DestroyCommentAction();
-        $result = $action($comment->id);
+        $action($comment->id);
         $this->assertSoftDeleted('comments', ['id' => $comment->id]);
-        $this->assertEquals('コメントは正常に削除されました。', $result['message']);
     }
 }

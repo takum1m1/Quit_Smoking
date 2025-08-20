@@ -10,6 +10,5 @@ class DestroyPostAction
     {
         $post = Post::findOrFail($id);
         $post->delete();
-        return ['message' => '投稿は正常に削除されました。'];
     }
 }

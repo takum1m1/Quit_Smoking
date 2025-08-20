@@ -23,7 +23,6 @@ class LoginAction
             return false; // ログイン失敗
         }
 
-        //ログイン済みの場合も新しいトークンを発行
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $token;
