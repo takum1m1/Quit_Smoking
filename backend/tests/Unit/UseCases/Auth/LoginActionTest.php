@@ -35,9 +35,12 @@ class LoginActionTest extends TestCase
             'password' => 'password',
         ];
 
-        $token = $this->action->__invoke($data);
-        $this->assertIsString($token);
-        $this->assertNotEmpty($token);
+        $result = $this->action->__invoke($data);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('token', $result);
+        $this->assertArrayHasKey('user', $result);
+        $this->assertIsString($result['token']);
+        $this->assertNotEmpty($result['token']);
     }
 
     /**
@@ -56,7 +59,7 @@ class LoginActionTest extends TestCase
         ];
 
         $result = $this->action->__invoke($data);
-        $this->assertFalse($result);
+        $this->assertNull($result);
     }
 
     /**
@@ -70,6 +73,6 @@ class LoginActionTest extends TestCase
         ];
 
         $result = $this->action->__invoke($data);
-        $this->assertFalse($result);
+        $this->assertNull($result);
     }
 }

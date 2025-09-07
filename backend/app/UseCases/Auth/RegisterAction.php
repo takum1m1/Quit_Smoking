@@ -17,10 +17,10 @@ class RegisterAction
     /**
      * Execute the registration action.
      * @param array $data
-     * @return User
+     * @return array
      * @throws \Exception
      */
-    public function __invoke(array $data): string
+    public function __invoke(array $data): array
     {
         return DB::transaction(function () use ($data) {
             $user = User::create([
@@ -36,7 +36,12 @@ class RegisterAction
                 'quit_date' => CarbonImmutable::now(),
             ]);
 
-            return $user->createToken('auth_token')->plainTextToken;
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return [
+                'token' => $token,
+                'user' => $user->load('profile')
+            ];
         });
     }
 }

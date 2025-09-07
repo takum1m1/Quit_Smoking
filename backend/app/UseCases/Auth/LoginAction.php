@@ -12,19 +12,22 @@ class LoginAction
      * Execute the login action.
      *
      * @param array $data
-     * @return bool
+     * @return array|null
      * @throws \Exception
      */
-    public function __invoke(array $data)
+    public function __invoke(array $data): ?array
     {
         $user = User::where('email', $data['email'])->first();
 
         if (!$user || !Hash::check($data['password'], $user->password)) {
-            return false; // ログイン失敗
+            return null; // ログイン失敗
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return $token;
+        return [
+            'token' => $token,
+            'user' => $user->load('profile')
+        ];
     }
 }

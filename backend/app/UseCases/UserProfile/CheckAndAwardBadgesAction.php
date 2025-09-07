@@ -24,7 +24,7 @@ class CheckAndAwardBadgesAction
         $quitDays = $quitDate->diffInDays($today);
 
         $awardedBadges = [];
-        $currentEarnedBadges = $userProfile->earned_badges ?? [];
+        $currentEarnedBadges = $userProfile->badges ?? [];
 
         // 設定からバッジ定義を取得
         $badgeDefinitions = config('badges.badges');
@@ -41,7 +41,7 @@ class CheckAndAwardBadgesAction
 
         // 新しいバッジが授与された場合、データベースを更新
         if (!empty($awardedBadges)) {
-            $userProfile->earned_badges = $currentEarnedBadges;
+            $userProfile->badges = $currentEarnedBadges;
             $userProfile->save();
 
             // ユーザープロフィールのキャッシュをクリア

@@ -35,7 +35,7 @@ class GetMyProfileAction
             $extendedLife = $quitCigarettes * 10; // 1本あたり10分
 
             // バッジ情報を取得
-            $badges = $this->getBadgesInfo($userProfile->earned_badges ?? []);
+            $badges = $this->getBadgesInfo($userProfile->badges ?? []);
 
             return [
                 'display_name'     => $userProfile->display_name,

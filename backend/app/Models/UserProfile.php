@@ -16,7 +16,11 @@ class UserProfile extends Model
         'daily_cigarettes',
         'pack_cost',
         'quit_date',
-        'earned_badges',
+        'quit_days_count',
+        'quit_cigarettes',
+        'saved_money',
+        'extended_life',
+        'badges',
     ];
 
     /**
@@ -28,7 +32,7 @@ class UserProfile extends Model
     {
         return [
             'quit_date' => 'date',
-            'earned_badges' => 'array',
+            'badges' => 'array',
         ];
     }
 

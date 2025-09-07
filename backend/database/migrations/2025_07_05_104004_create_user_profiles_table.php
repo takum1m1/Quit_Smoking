@@ -18,7 +18,11 @@ return new class extends Migration
             $table->unsignedInteger('daily_cigarettes');
             $table->integer('pack_cost');
             $table->date('quit_date');
-            $table->json('earned_badges')->nullable();
+            $table->integer('quit_days_count')->default(0);
+            $table->integer('quit_cigarettes')->default(0);
+            $table->integer('saved_money')->default(0);
+            $table->integer('extended_life')->default(0);
+            $table->json('badges')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -39,7 +39,7 @@ class CheckAndAwardBadgesActionTest extends TestCase
         // Assert
         $this->assertCount(1, $result);
         $this->assertEquals('one_week', $result[0]['code']);
-        $this->assertContains('one_week', $userProfile->fresh()->earned_badges);
+        $this->assertContains('one_week', $userProfile->fresh()->badges);
     }
 
     public function test_awards_one_month_badge_after_thirty_days_of_quitting(): void
@@ -58,8 +58,8 @@ class CheckAndAwardBadgesActionTest extends TestCase
 
         // Assert
         $this->assertCount(2, $result); // 1週間バッジと1ヶ月バッジの両方が授与される
-        $this->assertContains('one_week', $userProfile->fresh()->earned_badges);
-        $this->assertContains('one_month', $userProfile->fresh()->earned_badges);
+        $this->assertContains('one_week', $userProfile->fresh()->badges);
+        $this->assertContains('one_month', $userProfile->fresh()->badges);
     }
 
     public function test_does_not_award_duplicate_badges(): void
@@ -69,7 +69,7 @@ class CheckAndAwardBadgesActionTest extends TestCase
         $userProfile = UserProfile::factory()->create([
             'user_id' => $user->id,
             'quit_date' => Carbon::now()->subDays(7),
-            'earned_badges' => ['one_week'],
+            'badges' => ['one_week'],
         ]);
 
         Sanctum::actingAs($user);
@@ -79,7 +79,7 @@ class CheckAndAwardBadgesActionTest extends TestCase
 
         // Assert
         $this->assertEmpty($result);
-        $this->assertCount(1, $userProfile->fresh()->earned_badges);
+        $this->assertCount(1, $userProfile->fresh()->badges);
     }
 
     public function test_awards_multiple_badges_simultaneously(): void
@@ -98,8 +98,8 @@ class CheckAndAwardBadgesActionTest extends TestCase
 
         // Assert
         $this->assertCount(2, $result);
-        $this->assertContains('one_week', $userProfile->fresh()->earned_badges);
-        $this->assertContains('one_month', $userProfile->fresh()->earned_badges);
+        $this->assertContains('one_week', $userProfile->fresh()->badges);
+        $this->assertContains('one_month', $userProfile->fresh()->badges);
     }
 
 

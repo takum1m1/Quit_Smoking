@@ -20,7 +20,7 @@ class UserProfileControllerTest extends TestCase
         $userProfile = UserProfile::factory()->create([
             'user_id' => $user->id,
             'quit_date' => Carbon::now()->subDays(10),
-            'earned_badges' => ['one_week'],
+            'badges' => ['one_week'],
         ]);
 
         Sanctum::actingAs($user);
@@ -105,7 +105,7 @@ class UserProfileControllerTest extends TestCase
         $response->assertStatus(200);
 
         // バッジが授与されていることを確認
-        $this->assertContains('one_week', $userProfile->fresh()->earned_badges);
+        $this->assertContains('one_week', $userProfile->fresh()->badges);
     }
 
     public function test_other_user_profile_includes_badge_information(): void
@@ -116,13 +116,13 @@ class UserProfileControllerTest extends TestCase
         $otherUserProfile = UserProfile::factory()->create([
             'user_id' => $otherUser->id,
             'quit_date' => Carbon::now()->subDays(10),
-            'earned_badges' => ['one_week'],
+            'badges' => ['one_week'],
         ]);
 
         Sanctum::actingAs($user);
 
         // Act
-        $response = $this->getJson("/api/profile/{$otherUser->id}");
+        $response = $this->getJson("/api/user-profiles/{$otherUser->id}");
 
         // Assert
         $response->assertStatus(200);

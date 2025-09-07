@@ -173,7 +173,7 @@ class AuthControllerTest extends TestCase
 
         $response = $this->post('api/login', $data);
 
-        $response->assertStatus(302); // バリデーションエラーでリダイレクト
-        $response->assertSessionHasErrors(['email', 'password']);
+        $response->assertStatus(422); // バリデーションエラー
+        $response->assertJsonValidationErrors(['email', 'password']);
     }
 }

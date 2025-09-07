@@ -31,6 +31,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     // アカウント削除
     Route::delete('/user', [AuthController::class, 'destroy']);
+    // 現在のユーザー情報取得
+    Route::get('/user', [AuthController::class, 'me']);
     // ユーザープロフィール(自分の情報)
     Route::get('/profile', [UserProfileController::class, 'myProfile']);
     // バッジチェック
@@ -40,7 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // 禁煙情報リセット
     Route::post('/profile/reset', [UserProfileController::class, 'resetQuitInfo']);
     // ユーザープロフィール取得(他のユーザーの情報)
-    Route::get('/profile/{id}', [UserProfileController::class, 'showById']);
+    Route::get('/user-profiles/{id}', [UserProfileController::class, 'showById']);
     // 投稿一覧
     Route::get('/posts', [PostController::class, 'index']);
     // 投稿詳細

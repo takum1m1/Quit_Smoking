@@ -21,7 +21,11 @@ class UserProfileFactory extends Factory
             'daily_cigarettes' => $this->faker->numberBetween(1, 60),
             'pack_cost' => $this->faker->numberBetween(400, 3000),
             'quit_date' => $this->faker->dateTimeBetween('-1 year', 'now'),
-            'earned_badges' => [],
+            'badges' => [],
+            'quit_days_count' => $this->faker->numberBetween(0, 365),
+            'quit_cigarettes' => $this->faker->numberBetween(0, 10000),
+            'saved_money' => $this->faker->numberBetween(0, 500000),
+            'extended_life' => $this->faker->numberBetween(0, 100),
         ];
     }
 }

@@ -26,41 +26,59 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: docker/backend/Dockerfile
+      context: ./backend
+      dockerfile: ../docker/backend/Dockerfile
     image: quit_smoking-backend
     container_name: quit_smoking-api
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/var/www/html
+      - backend_storage:/var/www/html/storage
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
       APP_URL: http://localhost:8000
+      APP_KEY: base64:your-app-key-here
 
       DB_CONNECTION: mysql
       DB_HOST: mysql
-      DB_PORT: "3306"
+      DB_PORT: 3306
       DB_DATABASE: quit_smoking
       DB_USERNAME: root
       DB_PASSWORD: root
 
       BROADCAST_DRIVER: log
-      CACHE_STORE: redis
-      QUEUE_CONNECTION: redis
-      SESSION_DRIVER: redis
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      SESSION_DRIVER: database
       SESSION_LIFETIME: 120
 
-      REDIS_HOST: redis
-      REDIS_PASSWORD: null
-      REDIS_PORT: 6379
+      SANCTUM_STATEFUL_DOMAINS: localhost:3000,127.0.0.1:3000
+      SESSION_DOMAIN: localhost
     depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
+      - mysql
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend/Dockerfile.dev
+    image: quit_smoking-frontend
+    container_name: quit_smoking-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api
+    depends_on:
+      backend:
         condition: service_started
 
 volumes:
   mysql_data:
   redis_data:
+  backend_storage:
