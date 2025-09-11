@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
@@ -8,33 +8,45 @@ import { Input } from '@/components/ui/Input';
 import { Heart, MessageCircle, Share2, Plus, Search, Filter } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { Post } from '@/types';
+import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 export default function PostsPage() {
   const { user, userProfile, isLoading, logout } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['posts'],
+    queryFn: () => apiClient.getPosts(),
+    enabled: !!user && !!userProfile,
+    select: (posts: Post[]) =>
+      [...posts].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ),
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newPostContent, setNewPostContent] = useState('');
   const [showCommentForm, setShowCommentForm] = useState<number | null>(null);
   const [newCommentContent, setNewCommentContent] = useState('');
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  React.useEffect(() => {
+    if (data && Array.isArray(data)) setPosts(data);
+  }, [data]);
 
   const fetchPosts = async () => {
+    // 互換API（新規はReact Queryに任せる）
     try {
-      setLoading(true);
       const response = await apiClient.getPosts();
-      setPosts(response);
+      const sorted = Array.isArray(response)
+        ? [...response].sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          )
+        : [];
+      setPosts(sorted);
     } catch (error) {
       console.error('投稿の取得に失敗しました:', error);
       toast.error('投稿の取得に失敗しました');
       setPosts([]);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -118,29 +130,6 @@ export default function PostsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* ヘッダー */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Heart className="h-8 w-8 text-red-500 mr-3" />
-              <h1 className="text-2xl font-bold text-gray-900">QuitSmoking</h1>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 transition-colors">ダッシュボード</Link>
-              <Link href="/posts" className="text-blue-600 font-medium">コミュニティ</Link>
-              <Link href="/profile" className="text-gray-600 hover:text-gray-900 transition-colors">プロフィール</Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">こんにちは、{userProfile.display_name}さん</span>
-              <Button variant="outline" size="sm" onClick={logout}>
-                ログアウト
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* ページヘッダー */}
         <div className="flex justify-between items-center mb-8">
@@ -236,9 +225,12 @@ export default function PostsPage() {
                       </span>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">
+                      <Link 
+                        href={`/users/${post.user_id}`}
+                        className="font-semibold text-gray-900 hover:text-blue-600 transition-colors"
+                      >
                         {post.user?.profile?.display_name || '匿名ユーザー'}
-                      </p>
+                      </Link>
                       <p className="text-sm text-gray-500">
                         {new Date(post.created_at).toLocaleDateString('ja-JP')}
                       </p>
@@ -248,7 +240,9 @@ export default function PostsPage() {
 
                 {/* 投稿内容 */}
                 <div className="mb-4">
-                  <p className="text-gray-800 leading-relaxed">{post.content}</p>
+                  <Link href={`/posts/${post.id}`} className="block hover:bg-gray-50 p-2 -m-2 rounded-lg transition-colors">
+                    <p className="text-gray-800 leading-relaxed">{post.content}</p>
+                  </Link>
                 </div>
 
                 {/* 投稿アクション */}

@@ -109,29 +109,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* ヘッダー */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Heart className="h-8 w-8 text-red-500 mr-3" />
-              <h1 className="text-2xl font-bold text-gray-900">QuitSmoking</h1>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 transition-colors">ダッシュボード</Link>
-              <Link href="/posts" className="text-gray-600 hover:text-gray-900 transition-colors">コミュニティ</Link>
-              <Link href="/profile" className="text-blue-600 font-medium">プロフィール</Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">こんにちは、{userProfile.display_name || 'ユーザー'}さん</span>
-              <Button variant="outline" size="sm" onClick={logout}>
-                ログアウト
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* ページヘッダー */}
         <div className="flex justify-between items-center mb-8">
@@ -258,7 +235,7 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">禁煙日数</span>
                   <span className="text-2xl font-bold text-blue-600">
-                    {userProfile.quit_days_count || 0}日
+                    {Math.floor(Number(userProfile.quit_days_count ?? 0))}日
                   </span>
                 </div>
                 <div className="flex items-center justify-between">

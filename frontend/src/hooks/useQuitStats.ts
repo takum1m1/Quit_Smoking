@@ -20,7 +20,8 @@ export function useQuitStats(userProfile: UserProfile | null) {
       userProfile.pack_cost || 0,
       userProfile.quit_date
     );
-    const extendedLife = quitDays * 0.1; // 1日0.1時間延長
+    const quitCigarettes = (userProfile.daily_cigarettes || 0) * quitDays;
+    const extendedLife = quitCigarettes * 10; // 1本あたり10分延長
     const healthImprovements = calculateHealthImprovements(userProfile.quit_date);
 
     return {

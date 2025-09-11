@@ -19,40 +19,6 @@ import { Button } from '@/components/ui/Button';
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* ヘッダー */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Heart className="h-8 w-8 text-red-500 mr-3" />
-              <h1 className="text-2xl font-bold text-gray-900">QuitSmoking</h1>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <Link href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">
-                機能
-              </Link>
-              <Link href="#about" className="text-gray-600 hover:text-gray-900 transition-colors">
-                について
-              </Link>
-              <Link href="#contact" className="text-gray-600 hover:text-gray-900 transition-colors">
-                お問い合わせ
-              </Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <Link href="/auth/login">
-                <Button variant="ghost" size="sm">
-                  ログイン
-                </Button>
-              </Link>
-              <Link href="/auth/register">
-                <Button size="sm">
-                  無料で始める
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* メインコンテンツ */}
       <main>
@@ -83,25 +49,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 統計セクション */}
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-blue-600 mb-2">10,000+</div>
-                <div className="text-gray-600">禁煙成功者</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-green-600 mb-2">¥50M+</div>
-                <div className="text-gray-600">節約金額</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-purple-600 mb-2">98%</div>
-                <div className="text-gray-600">満足度</div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* 統計セクション（誇張表現を避けるため削除） */}
 
         {/* 機能セクション */}
         <section id="features" className="py-20 bg-gray-50">
@@ -112,7 +60,7 @@ export default function HomePage() {
               </h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                 科学的根拠に基づいた禁煙サポートと、コミュニティ機能で
-                禁煙の成功を確実にします。
+                禁煙の成功を後押しします。
               </p>
             </div>
 
@@ -185,7 +133,7 @@ export default function HomePage() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">カスタマイズ</h3>
                 <p className="text-gray-600">
                   あなたの禁煙スタイルに合わせてカスタマイズ。
-                  個別の目標設定とリマインダーで確実に禁煙を成功させます。
+                  個別の目標設定とリマインダーで継続を後押しします。
                 </p>
               </div>
             </div>
@@ -276,58 +224,6 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
-      {/* フッター */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center mb-4">
-                <Heart className="h-8 w-8 text-red-500 mr-3" />
-                <h3 className="text-xl font-bold">QuitSmoking</h3>
-              </div>
-              <p className="text-gray-400">
-                科学的根拠に基づいた禁煙サポートで、
-                あなたの禁煙成功をサポートします。
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold mb-4">機能</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="#features" className="hover:text-white transition-colors">進捗管理</Link></li>
-                <li><Link href="#features" className="hover:text-white transition-colors">コミュニティ</Link></li>
-                <li><Link href="#features" className="hover:text-white transition-colors">バッジシステム</Link></li>
-                <li><Link href="#features" className="hover:text-white transition-colors">健康改善</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold mb-4">サポート</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="#contact" className="hover:text-white transition-colors">お問い合わせ</Link></li>
-                <li><Link href="#about" className="hover:text-white transition-colors">ヘルプ</Link></li>
-                <li><Link href="#about" className="hover:text-white transition-colors">FAQ</Link></li>
-                <li><Link href="#about" className="hover:text-white transition-colors">プライバシーポリシー</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold mb-4">コミュニティ</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/posts" className="hover:text-white transition-colors">投稿一覧</Link></li>
-                <li><Link href="/posts/create" className="hover:text-white transition-colors">新規投稿</Link></li>
-                <li><Link href="#about" className="hover:text-white transition-colors">ガイドライン</Link></li>
-                <li><Link href="#about" className="hover:text-white transition-colors">コミュニティルール</Link></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 QuitSmoking. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

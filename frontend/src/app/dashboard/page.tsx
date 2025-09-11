@@ -20,6 +20,7 @@ export default function DashboardPage() {
     );
   }
 
+  // 認証状態をチェック（初期化完了後）
   if (!user || !userProfile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center">
@@ -43,29 +44,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* ヘッダー */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Heart className="h-8 w-8 text-red-500 mr-3" />
-              <h1 className="text-2xl font-bold text-gray-900">QuitSmoking</h1>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/dashboard" className="text-blue-600 font-medium">ダッシュボード</Link>
-              <Link href="/posts" className="text-gray-600 hover:text-gray-900 transition-colors">コミュニティ</Link>
-              <Link href="/profile" className="text-gray-600 hover:text-gray-900 transition-colors">プロフィール</Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">こんにちは、{userProfile.display_name || 'ユーザー'}さん</span>
-              <Button variant="outline" size="sm" onClick={logout}>
-                ログアウト
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* ウェルカムセクション */}
         <div className="text-center mb-12">
@@ -128,31 +106,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* アクションカード */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white rounded-xl p-8 shadow-soft">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">今日の目標</h3>
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                <span className="text-gray-700">禁煙を継続する</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                <span className="text-gray-700">水分を十分に摂る</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                <span className="text-gray-700">軽い運動をする</span>
-              </div>
-            </div>
-            <div className="mt-6">
-              <Button className="w-full">
-                目標を更新
-              </Button>
-            </div>
-          </div>
-
+        {/* アクションカード（コミュニティのみ表示） */}
+        <div className="grid grid-cols-1 gap-8">
           <div className="bg-white rounded-xl p-8 shadow-soft">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">コミュニティ</h3>
             <p className="text-gray-600 mb-6">

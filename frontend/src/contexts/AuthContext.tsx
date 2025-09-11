@@ -18,6 +18,7 @@ interface AuthContextType {
   refreshUser: () => Promise<void>;
   refreshUserProfile: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<boolean>;
+  checkAuthStatus: () => Promise<boolean>;
 }
 
 // 認証コンテキストの作成
@@ -36,10 +37,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
 
   // 認証状態の確認
-  const isAuthenticated = !!user && !!userProfile;
+  const isAuthenticated = !!user && !!userProfile && isInitialized;
 
   /**
    * プロフィール情報を取得
@@ -47,10 +49,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const fetchUserProfile = useCallback(async (userId: number): Promise<UserProfile | null> => {
     try {
       const response = await apiClient.getUserProfile(userId);
-      if (response.data) {
-        return response.data as UserProfile;
-      }
-      return null;
+      // APIクライアントはUserProfileを直接返す
+      return response as UserProfile;
     } catch (error) {
       console.error('プロフィール取得エラー:', error);
       return null;
@@ -103,41 +103,82 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * 認証の初期化
    */
   const initializeAuth = useCallback(async () => {
+    console.log('=== 認証初期化開始 ===');
+    
+    // クライアントサイドでのみ実行
+    if (typeof window === 'undefined') {
+      console.log('サーバーサイドレンダリング中 - 認証初期化をスキップ');
+      setIsLoading(false);
+      setIsInitialized(true);
+      return;
+    }
+
     try {
       const token = localStorage.getItem('auth_token');
-      console.log('認証初期化開始 - トークン:', token ? '存在' : 'なし');
+      console.log('localStorageから取得したトークン:', token ? `${token.substring(0, 20)}...` : 'なし');
       
-      if (token) {
-        apiClient.setToken(token);
-        
-        // ユーザー情報を取得
-        const userResponse = await apiClient.getCurrentUser();
-        console.log('ユーザー情報取得結果:', userResponse);
-        
-        if (userResponse.user) {
-          setUser(userResponse.user);
-          
-          // 正しいユーザーIDでプロフィールを取得
-          const profile = await fetchUserProfile(userResponse.user.id);
-          if (profile) {
-            setUserProfile(profile);
-          }
-        }
+      if (!token) {
+        console.log('トークンが存在しません。未認証状態に設定します。');
+        setUser(null);
+        setUserProfile(null);
+        setIsLoading(false);
+        setIsInitialized(true);
+        return;
       }
+
+      console.log('トークンが存在します。APIクライアントの状態を確認中...');
+      // APIクライアントが既にトークンを持っているかチェック
+      if (!apiClient.currentToken) {
+        console.log('APIクライアントにトークンを設定中...');
+        apiClient.setToken(token);
+      } else {
+        console.log('APIクライアントは既にトークンを持っています');
+      }
+      
+      console.log('ユーザー情報を取得中...');
+      // ユーザー情報を取得
+      const userResponse = await apiClient.getCurrentUser();
+      console.log('ユーザー情報取得結果:', userResponse);
+      
+      if (!userResponse.user) {
+        console.log('ユーザー情報が取得できませんでした。トークンを削除します。');
+        localStorage.removeItem('auth_token');
+        apiClient.removeToken();
+        setUser(null);
+        setUserProfile(null);
+        setIsLoading(false);
+        setIsInitialized(true);
+        return;
+      }
+
+      console.log('ユーザー情報取得成功。ユーザー状態を設定中...');
+      setUser(userResponse.user);
+      
+      console.log('プロフィール情報を取得中...');
+      // 正しいユーザーIDでプロフィールを取得
+      const profile = await fetchUserProfile(userResponse.user.id);
+      if (profile) {
+        console.log('プロフィール情報取得成功:', profile);
+        setUserProfile(profile);
+      } else {
+        console.log('プロフィール情報の取得に失敗しました');
+        setUserProfile(null);
+      }
+      
     } catch (error) {
       console.error('認証初期化エラー:', error);
+      console.error('エラーの詳細:', error);
+      
       // 認証に失敗した場合はトークンを削除
       localStorage.removeItem('auth_token');
       apiClient.removeToken();
       setUser(null);
       setUserProfile(null);
       
-      // ログインページにリダイレクト（現在のページがログインページでない場合のみ）
-      if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth/')) {
-        window.location.href = '/auth/login';
-      }
     } finally {
+      console.log('認証初期化完了。ローディング状態を解除します。');
       setIsLoading(false);
+      setIsInitialized(true);
     }
   }, [fetchUserProfile]);
 
@@ -145,27 +186,77 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * 初期化時にユーザー情報を取得
    */
   useEffect(() => {
-    initializeAuth();
-  }, [initializeAuth]);
+    if (!isInitialized) {
+      console.log('AuthContext: useEffect実行 - 認証初期化を開始します');
+      initializeAuth();
+    }
+  }, [initializeAuth, isInitialized]);
+
+  /**
+   * ストレージの変更を監視
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'auth_token') {
+        console.log('localStorageのauth_tokenが変更されました:', e.newValue ? '設定' : '削除');
+        if (!e.newValue && user) {
+          // トークンが削除された場合はログアウト
+          console.log('トークンが削除されました。ログアウト処理を実行します。');
+          setUser(null);
+          setUserProfile(null);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [user]);
+
+  /**
+   * 認証状態をチェック
+   */
+  const checkAuthStatus = useCallback(async (): Promise<boolean> => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        return false;
+      }
+
+      apiClient.setToken(token);
+      const userResponse = await apiClient.getCurrentUser();
+      return !!userResponse.user;
+    } catch (error) {
+      console.error('認証状態チェックエラー:', error);
+      return false;
+    }
+  }, []);
 
   /**
    * ユーザーログイン
    */
   const login = async (data: LoginRequest): Promise<boolean> => {
     try {
+      console.log('=== ログイン処理開始 ===');
       setIsLoading(true);
       
       // ログイン処理
+      console.log('ログインAPIを呼び出し中...');
       const response = await apiClient.login(data);
+      console.log('ログインAPIレスポンス:', response);
       
       if (!response.token) {
+        console.log('ログイン失敗: トークンが取得できませんでした');
         toast.error(response.message || 'ログインに失敗しました');
         return false;
       }
 
       // トークンを設定
+      console.log('トークンを設定中...', `${response.token.substring(0, 20)}...`);
       apiClient.setToken(response.token);
       localStorage.setItem('auth_token', response.token);
+      console.log('トークンの設定が完了しました');
       
       // ユーザー情報を取得
       if (response.user) {
@@ -187,13 +278,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // 成功通知とリダイレクト
       toast.success('ログインに成功しました！ダッシュボードに移動しています...');
-      
+
       setTimeout(() => {
         router.push('/dashboard');
       }, 1000);
-      
+
       return true;
-      
+
     } catch (error: unknown) {
       console.error('ログインエラー:', error);
       const errorMessage = error instanceof Error ? error.message : 'ログインに失敗しました';
@@ -212,12 +303,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.log('=== AuthContext register開始 ===');
       console.log('受信データ:', data);
       setIsLoading(true);
-      
+
       console.log('apiClient.registerを呼び出し中...');
       // 登録処理
       const response = await apiClient.register(data);
       console.log('apiClient.registerレスポンス:', response);
-      
+
       if (!response.token) {
         console.log('トークンが取得できませんでした:', response);
         toast.error(response.message || 'アカウント登録に失敗しました');
@@ -318,7 +409,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!user) return false;
 
     try {
-      const response = await apiClient.updateUserProfile(user.id, data);
+      const response = await apiClient.updateUserProfile(data);
       
       if (response.data) {
         setUserProfile(response.data as UserProfile);
@@ -348,6 +439,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     refreshUser,
     refreshUserProfile,
     updateProfile,
+    checkAuthStatus,
   };
 
   return (

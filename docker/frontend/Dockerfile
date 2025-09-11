@@ -1,57 +1,50 @@
-# フロントエンド用Dockerfile
-# Next.js 15.2.4 + TypeScript + Tailwind CSS
+# 本番環境用フロントエンドDockerfile
+FROM node:20-alpine AS builder
 
-# ベースイメージ
-FROM node:20-alpine AS base
-
-# 依存関係のインストール
-FROM base AS deps
-# パッケージマネージャーのキャッシュを無効化
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # パッケージファイルをコピー
 COPY package.json package-lock.json* ./
+
+# 依存関係をインストール（ビルドにはdevDependenciesも必要）
 RUN npm ci
 
-# ビルドステージ
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# アプリケーションのソースコードをコピー
 COPY . .
 
-# 環境変数の設定
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
-ENV NEXT_PUBLIC_API_URL http://localhost:8000/api
+# ビルド時にパブリック環境変数を注入できるように
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NODE_ENV=production
 
-# ビルドの実行
+# 本番用ビルドを実行
 RUN npm run build
 
-# 本番環境
-FROM base AS runner
+# 本番環境用の軽量なイメージ
+FROM node:20-alpine AS runner
+
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+# ビルド済みアプリケーションをコピー
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
-# 非rootユーザーの作成
+# 非rootユーザーを作成
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# 必要なファイルをコピー
-COPY --from=builder /app/public ./public
-
-# standaloneモードでビルドされた場合の処理
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
+# 権限を設定
 USER nextjs
 
+# ポートを公開
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+# 環境変数を設定
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
-# アプリケーションの起動
+# アプリケーションを起動
 CMD ["node", "server.js"]

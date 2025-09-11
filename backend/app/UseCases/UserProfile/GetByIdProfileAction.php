@@ -26,14 +26,15 @@ class GetByIdProfileAction
 
         $quitDaysCount = $quitDate->diffInDays($now);
 
-        $quitCigarettes = $dailyCigarettes * $quitDaysCount;
-        $savedMoney = ($packCost * $quitCigarettes) / 20;
-        $extendedLife = $quitCigarettes * 10; // 1本あたり10分
+        $quitCigarettes = (int) ($dailyCigarettes * $quitDaysCount);
+        $savedMoney = (int) (($packCost * $quitCigarettes) / 20);
+        $extendedLife = (int) ($quitCigarettes * 10); // 1本あたり10分延長
 
         // バッジ情報を取得
         $badges = $this->getBadgesInfo($userProfile->badges ?? []);
 
         return [
+            'user_id'          => $userProfile->user_id,
             'display_name'     => $userProfile->display_name,
             'daily_cigarettes' => $dailyCigarettes,
             'pack_cost'        => $packCost,
@@ -43,6 +44,8 @@ class GetByIdProfileAction
             'saved_money'      => $savedMoney,
             'extended_life'    => $extendedLife,
             'badges'           => $badges,
+            'created_at'       => $userProfile->created_at->toISOString(),
+            'updated_at'       => $userProfile->updated_at->toISOString(),
         ];
 
     }

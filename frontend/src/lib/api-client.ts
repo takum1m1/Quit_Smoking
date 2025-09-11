@@ -21,17 +21,40 @@ class ApiClient {
   private token: string | null;
 
   constructor() {
+    // 本番環境では環境変数から、開発環境ではデフォルト値を使用
     this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-    this.token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    this.token = null; // 初期化時はトークンを設定しない
+    
+    // クライアントサイドでのみトークンを初期化
+    if (typeof window !== 'undefined') {
+      const savedToken = localStorage.getItem('auth_token');
+      if (savedToken) {
+        console.log('APIクライアント初期化: localStorageからトークンを復元中...', `${savedToken.substring(0, 20)}...`);
+        this.token = savedToken;
+        console.log('APIクライアント初期化: トークンが復元されました');
+      } else {
+        console.log('APIクライアント初期化: 保存されたトークンはありません');
+      }
+      console.log('APIクライアント初期化: ベースURL', this.baseURL);
+    }
+  }
+
+  /**
+   * 現在のトークンを取得
+   */
+  get currentToken(): string | null {
+    return this.token;
   }
 
   /**
    * 認証トークンを設定
    */
   setToken(token: string): void {
+    console.log('APIクライアント: トークンを設定中...', token ? `${token.substring(0, 20)}...` : 'なし');
     this.token = token;
     if (typeof window !== 'undefined') {
       localStorage.setItem('auth_token', token);
+      console.log('APIクライアント: localStorageにトークンを保存しました');
     }
   }
 
@@ -39,9 +62,11 @@ class ApiClient {
    * 認証トークンを削除
    */
   removeToken(): void {
+    console.log('APIクライアント: トークンを削除中...');
     this.token = null;
     if (typeof window !== 'undefined') {
       localStorage.removeItem('auth_token');
+      console.log('APIクライアント: localStorageからトークンを削除しました');
     }
   }
 
@@ -60,6 +85,9 @@ class ApiClient {
 
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
+      console.log('APIリクエスト: Authorizationヘッダーを設定しました', `Bearer ${this.token.substring(0, 20)}...`);
+    } else {
+      console.log('APIリクエスト: トークンがありません。Authorizationヘッダーは設定されません');
     }
 
     const config: RequestInit = {
@@ -96,12 +124,8 @@ class ApiClient {
       }
       
       if (!response.ok) {
-        // 認証エラーの場合はトークンを削除
-        if (response.status === 401) {
-          this.removeToken();
-          localStorage.removeItem('auth_token');
-        }
-        
+        // 401 の際に即トークンを破棄しない（初期化レース等で誤って消さないため）
+        // トークンの無効化は上位（AuthContext）で判断する
         let errorMessage = `HTTP error! status: ${response.status}`;
         
         if (responseData && typeof responseData === 'object' && 'message' in responseData) {
@@ -192,8 +216,8 @@ class ApiClient {
   /**
    * ユーザープロフィールを取得
    */
-  async getUserProfile(userId: number): Promise<ApiResponse> {
-    return this.request<ApiResponse>(`/user-profiles/${userId}`);
+  async getUserProfile(userId: number): Promise<UserProfile> {
+    return this.request<UserProfile>(`/user-profiles/${userId}`);
   }
 
   /**
@@ -294,8 +318,8 @@ class ApiClient {
   /**
    * コメントを削除
    */
-  async deleteComment(commentId: number): Promise<ApiResponse> {
-    return this.request<ApiResponse>(`/comments/${commentId}`, {
+  async deleteComment(postId: number, commentId: number): Promise<ApiResponse> {
+    return this.request<ApiResponse>(`/posts/${postId}/comments/${commentId}`, {
       method: 'DELETE',
     });
   }
@@ -320,45 +344,7 @@ class ApiClient {
     });
   }
 
-  /**
-   * 投稿のいいね状態を確認
-   */
-  async checkLikeStatus(postId: number): Promise<{ liked: boolean }> {
-    return this.request<{ liked: boolean }>(`/posts/${postId}/like-status`);
-  }
-
-  // ==================== 統計関連 ====================
-
-  /**
-   * 禁煙統計を取得
-   */
-  async getQuitStats(): Promise<ApiResponse> {
-    return this.request<ApiResponse>('/quit-stats');
-  }
-
-  /**
-   * バッジ一覧を取得
-   */
-  async getBadges(): Promise<ApiResponse> {
-    return this.request<ApiResponse>('/badges');
-  }
-
-  // ==================== 検索・フィルタ関連 ====================
-
-  /**
-   * 投稿を検索
-   */
-  async searchPosts(query: string, filters?: Record<string, string>): Promise<PostsResponse> {
-    const params = new URLSearchParams({ q: query, ...filters });
-    return this.request<PostsResponse>(`/posts/search?${params}`);
-  }
-
-  /**
-   * ユーザーを検索
-   */
-  async searchUsers(query: string): Promise<ApiResponse> {
-    return this.request<ApiResponse>(`/users/search?q=${encodeURIComponent(query)}`);
-  }
+  // バックエンドに未実装のエンドポイントは削除
 }
 
 // シングルトンインスタンスをエクスポート
