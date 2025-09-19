@@ -1,38 +1,37 @@
-# 禁煙支援アプリケーションAPI
+# 禁煙支援アプリケーション（API + フロントエンド）
 
-禁煙を志す人々をサポートするコミュニティアプリケーションのAPIです。禁煙の進捗管理、コミュニティ機能、バッジシステムを通じて、ユーザーの禁煙成功を支援します。
+禁煙を志す人々をサポートするコミュニティアプリです。禁煙の進捗管理、コミュニティ機能、バッジシステムを通じてユーザーの禁煙成功を支援します。API は Laravel、フロントは Next.js で構成し、Docker でローカル/本番を統一運用します。
 
 ## 🚀 機能
 
-### ユーザー機能
-- **ユーザー認証**: 登録・ログイン・ログアウト
-- **プロフィール管理**: 禁煙開始日、1日の喫煙本数、タバコ代の設定
-- **禁煙進捗管理**: 禁煙期間の自動計算
-- **バッジシステム**: 禁煙期間に応じたバッジ授与（1週間、1ヶ月、半年、1年）
+### ユーザー
+- **認証**: 登録 / ログイン / ログアウト / 現在ユーザー取得
+- **プロフィール管理**: 禁煙開始日・喫煙本数・タバコ代の設定/更新、禁煙進捗の自動計算
+- **バッジ**: 禁煙期間に応じたバッジ授与（1週間・1ヶ月・半年・1年）
 
-### コミュニティ機能
-- **投稿機能**: 禁煙の進捗や感想を投稿
-- **コメント機能**: 他のユーザーの投稿にコメント
-- **いいね機能**: 投稿へのいいね
-- **ユーザープロフィール閲覧**: 他のユーザーの禁煙進捗を確認
+### コミュニティ
+- **投稿**: 作成・閲覧・更新・削除
+- **コメント**: 作成・削除
+- **いいね**: 付与・解除
+- **ユーザープロフィール閲覧**: 他ユーザーの禁煙進捗の確認
 
-### 管理者機能
-- **ユーザー管理**: ユーザーの一覧・詳細・削除
-- **投稿管理**: 投稿の一覧・詳細・削除
-- **コメント管理**: コメントの一覧・詳細・削除
+### 管理者
+- **ユーザー/投稿/コメント**: 一覧・詳細・削除（要管理者権限）
 
 ## 🛠 技術スタック
 
 ### バックエンド
-- **PHP 8.4**
-- **Laravel 12**
-- **MySQL 8.4**
-- **Redis 7** (キャッシュ・セッション管理)
-- **Laravel Sanctum** (API認証)
+- PHP 8.4（Composer 要件は ^8.2）
+- Laravel 12
+- MySQL 8.4 / Redis 7（キャッシュ・セッション）
+- Laravel Sanctum（Bearer トークン認証）
 
-### 開発環境
-- **Docker** (コンテナ化)
-- **Docker Compose** (マルチコンテナ管理)
+### フロントエンド
+- Next.js 15（App Router）/ React 19 / TypeScript
+- Tailwind CSS / @tanstack/react-query
+
+### 開発/運用
+- Docker / docker compose（開発: `docker-compose.yml` / 本番: `docker-compose.prod.yml`, `deploy.sh`）
 
 ## 📁 プロジェクト構造
 
@@ -40,184 +39,150 @@
 Quit_Smoking/
 ├── backend/                 # Laravel API
 │   ├── app/
-│   │   ├── Http/
-│   │   │   ├── Controllers/ # APIコントローラー
-│   │   │   ├── Requests/    # バリデーション
-│   │   │   └── Middleware/  # ミドルウェア
-│   │   ├── Models/          # Eloquentモデル
-│   │   └── UseCases/        # ビジネスロジック
-│   ├── tests/               # テストファイル
-│   │   ├── Feature/         # 統合テスト
-│   │   └── Unit/            # 単体テスト
-│   └── routes/api.php       # APIルート
-├── docker/                  # Docker設定
-│   └── backend/
-│       └── Dockerfile       # PHP環境の設定
-├── docker-compose.yml       # コンテナ構成
-└── frontend/                # フロントエンド（将来実装予定）
+│   │   ├── Http/Controllers # 薄いコントローラ（業務ロジックは UseCases）
+│   │   ├── Http/Requests    # バリデーション
+│   │   ├── Http/Middleware
+│   │   ├── Models           # Eloquent モデル
+│   │   └── UseCases         # 業務ロジック（ユースケース層）
+│   ├── routes/api.php       # API ルート定義
+│   └── tests/{Feature,Unit}
+├── frontend/                # Next.js フロント
+│   └── src/{app,components,contexts,utils}
+├── docker/
+│   ├── backend/Dockerfile
+│   └── frontend/{Dockerfile,Dockerfile.dev}
+├── docker-compose.yml       # 開発用 compose
+├── docker-compose.prod.yml  # 本番用 compose
+└── deploy.sh                # デプロイスクリプト
 ```
 
-## 🐳 Docker環境でのセットアップ
+## 🐳 セットアップ（Docker）
 
 ### 前提条件
-- **Docker Desktop** がインストールされていること
-- **Git** がインストールされていること
+- Docker Desktop / Git がインストール済み
 
-### 🚀 簡単セットアップ（推奨）
-
-#### 1. リポジトリのクローン
+### 1) リポジトリ取得
 ```bash
-git clone https://github.com/your-username/quit-smoking.git
-cd quit-smoking
+git clone <your-repo-url>
+cd Quit_Smoking
 ```
 
-#### 2. 環境変数ファイルの作成
+### 2) 環境変数ファイル作成（バックエンド）
 ```bash
-# バックエンドディレクトリに移動
 cd backend
-
-# 環境変数ファイルを作成
 cp .env.example .env
-```
-
-#### 3. Docker環境の起動
-```bash
-# プロジェクトルートに戻る
 cd ..
-
-# Dockerコンテナを起動
-docker-compose up -d
 ```
 
-#### 4. アプリケーションの初期化
+### 3) 起動
 ```bash
-# アプリケーションキーの生成
-docker-compose exec backend php artisan key:generate
-
-# データベースのマイグレーション
-docker-compose exec backend php artisan migrate
-
-# テストデータの作成（オプション）
-docker-compose exec backend php artisan db:seed
+docker compose up -d
 ```
 
-#### 5. アクセス確認
-- **API**: http://localhost:8000/api
-- **ヘルスチェック**: http://localhost:8000/api/health
-
-### 🔧 開発用コマンド
-
-#### コンテナの管理
+### 4) 初期化
 ```bash
-# コンテナの起動
-docker-compose up -d
-
-# コンテナの停止
-docker-compose down
-
-# ログの確認
-docker-compose logs backend
-
-# コンテナ内でコマンド実行
-docker-compose exec backend php artisan list
+docker compose exec backend php artisan key:generate
+docker compose exec backend php artisan migrate
+# オプション: シーディング
+docker compose exec backend php artisan db:seed
 ```
 
-#### テストの実行
+### 5) アクセス
+- フロント: http://localhost:3000
+- API: http://localhost:8000/api
+- ヘルスチェック: http://localhost:8000/up
+
+## 🔧 よく使うコマンド
+
+### コンテナ管理
 ```bash
-# 全テストの実行
-docker-compose exec backend php artisan test
-
-# 特定のテストファイル
-docker-compose exec backend php artisan test tests/Feature/Http/Controllers/AuthControllerTest.php
-
-# テストカバレッジ
-docker-compose exec backend php artisan test --coverage-text
+docker compose up -d              # 起動
+docker compose down               # 停止
+docker compose logs -f backend    # ログ
+docker compose exec backend php artisan list
 ```
 
-#### データベース操作
+### テスト
 ```bash
-# マイグレーション
-docker-compose exec backend php artisan migrate
+# Backend
+docker compose exec backend php artisan test
 
-# ロールバック
-docker-compose exec backend php artisan migrate:rollback
-
-# シーダー実行
-docker-compose exec backend php artisan db:seed
-
-# データベースリセット
-docker-compose exec backend php artisan migrate:fresh --seed
+# Frontend
+docker compose exec frontend npm test
 ```
 
-#### キャッシュ管理
+### データベース
 ```bash
-# キャッシュの状態確認
-docker-compose exec backend php artisan cache:status
+docker compose exec backend php artisan migrate
+docker compose exec backend php artisan migrate:rollback
+docker compose exec backend php artisan migrate:fresh --seed
+```
 
-# 全キャッシュクリア
-docker-compose exec backend php artisan cache:clear-all
+### キャッシュ/運用
+```bash
+# カスタム: キャッシュ状態
+docker compose exec backend php artisan cache:status
+
+# カスタム: キャッシュ全消去（または posts/profiles を指定）
+docker compose exec backend php artisan cache:clear-all
+docker compose exec backend php artisan cache:clear-all --type=posts
+docker compose exec backend php artisan cache:clear-all --type=profiles
 
 # 設定キャッシュクリア
-docker-compose exec backend php artisan config:clear
+docker compose exec backend php artisan config:clear
 ```
 
-### 主要なエンドポイント
+## 🌐 主要エンドポイント（抜粋）
 
-#### 認証
-- `POST /api/register` - ユーザー登録
-- `POST /api/login` - ログイン
-- `POST /api/logout` - ログアウト
+### 公開
+- POST `/api/register`（登録）
+- POST `/api/login`（ログイン）
+- POST `/api/forgot-password`（再設定リンク送信）
+- POST `/api/reset-password/{token}`（パスワード更新）
 
-#### ユーザープロフィール
-- `GET /api/profile` - 自分のプロフィール取得
-- `PUT /api/profile` - プロフィール更新
-- `POST /api/profile/check-badges` - バッジチェック
+### 要認証（Sanctum）
+- GET `/api/user`（現在ユーザー）
+- GET `/api/profile`（自分のプロフィール）
+- PATCH `/api/profile`（プロフィール更新）
+- POST `/api/profile/check-badges`（バッジチェック）
+- POST `/api/profile/reset`（禁煙情報リセット）
+- GET `/api/user-profiles/{id}`（他ユーザーのプロフィール）
 
-#### コミュニティ
-- `GET /api/posts` - 投稿一覧取得
-- `POST /api/posts` - 投稿作成
-- `GET /api/posts/{id}` - 投稿詳細取得
-- `PUT /api/posts/{id}` - 投稿更新
-- `DELETE /api/posts/{id}` - 投稿削除
+### 投稿/コメント/いいね（要認証）
+- GET `/api/posts` / GET `/api/posts/{id}`
+- POST `/api/posts` / PUT `/api/posts/{id}` / DELETE `/api/posts/{id}`
+- POST `/api/posts/{postId}/comments` / DELETE `/api/posts/{postId}/comments/{commentId}`
+- POST `/api/posts/{postId}/like` / POST `/api/posts/{postId}/unlike`
 
-## 🧪 テスト
-
-プロジェクトには包括的なテストスイートが含まれています：
-
-- **Feature Tests**: APIエンドポイントの統合テスト
-- **Unit Tests**: ビジネスロジックの単体テスト
-- **Request Tests**: バリデーションのテスト
-
-### テストの実行
-```bash
-# 全テストの実行
-docker-compose exec backend php artisan test
-
-# 特定のテストファイルの実行
-docker-compose exec backend php artisan test tests/Feature/Http/Controllers/AuthControllerTest.php
-```
+### 管理者（auth:sanctum, admin）
+- GET `/api/admin/users` / GET `/api/admin/users/{id}` / DELETE `/api/admin/users/{id}`
+- GET `/api/admin/posts` / GET `/api/admin/posts/{id}` / DELETE `/api/admin/posts/{id}`
+- GET `/api/admin/comments` / GET `/api/admin/comments/{id}` / DELETE `/api/admin/comments/{id}`
 
 ## 📊 プロジェクトの特徴
 
 ### アーキテクチャ
-- **クリーンアーキテクチャ**: ビジネスロジックとプレゼンテーション層の分離
-- **UseCase層**: 複雑なビジネスロジックの集約
+- 薄いコントローラ + UseCase 層でビジネスロジックを集約
+- フロント/バック分離（SPA + API）
 
-### セキュリティ
-- **Laravel Sanctum**: 安全なAPI認証
-- **バリデーション**: 包括的な入力検証
+### セキュリティ/運用
+- Sanctum によるトークン認証
+- CORS/SameSite/Stateful ドメイン設定
 
-### パフォーマンス
-- **Redisキャッシュ**: 投稿一覧とユーザープロフィールのキャッシュ
+## 🔧 環境変数の要点（開発）
+- フロント: `NEXT_PUBLIC_API_URL=http://localhost:8000/api`
+- バック: `SANCTUM_STATEFUL_DOMAINS=localhost:3000,127.0.0.1:3000`、`SESSION_DOMAIN=localhost`
+
+## 📚 参考
+- `PROJECT_OVERVIEW.md`（全体像と詳細）
+- `QUICKSTART.md`（最速起動ガイド）
+- `README-DEPLOYMENT.md`（デプロイ手順）
 
 ## 👨‍💻 作者
-
-- **名前**: [桐木 拓海]
-- **GitHub**: [@takum1m1](https://github.com/takum1m1)
+- 名前: 桐木 拓海
+- GitHub: [@takum1m1](https://github.com/takum1m1)
 
 ## 今後の展望
-- フロントエンドの実装
+- フロント機能拡張 / API 仕様の明文化
 - 外部サービス連携
-- デプロイ、リリースの経験
-- さらにAIを活用した効率的な開発
-- API仕様書等の作成
+- 本番運用の強化（監視・ログ・セキュリティ）
